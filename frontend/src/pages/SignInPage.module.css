@@ -1,0 +1,66 @@
+.signInPage {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background: var(--bg);
+  font-family: "Inter", sans-serif;
+  color: var(--text);
+  overflow: hidden;
+}
+
+.signInGlow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 10% 0%, rgba(255, 216, 90, 0.4), transparent 45%),
+    radial-gradient(circle at 100% 10%, rgba(255, 184, 0, 0.16), transparent 40%),
+    radial-gradient(circle at 20% 100%, rgba(255, 200, 50, 0.18), transparent 40%);
+  pointer-events: none;
+}
+
+.signInContent {
+  position: relative;
+  z-index: 1;
+  max-width: 440px;
+  text-align: center;
+}
+
+.title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin: 22px 0 10px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.brandMark {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: linear-gradient(145deg, #ffcb3d, var(--yellow-deep));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(245, 163, 0, 0.35);
+}
+
+.brandMark svg {
+  width: 19px;
+  height: 19px;
+}
+
+.brandName {
+  font-weight: 800;
+  font-size: 32px;
+  letter-spacing: -0.01em;
+}
+
