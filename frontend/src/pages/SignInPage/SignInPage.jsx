@@ -1,4 +1,5 @@
 import styles from './SignInPage.module.css';
+import AuthModal from '../../components/AuthModal/AuthModal';
 
 export default function SignInPage() {
     return (
@@ -14,6 +15,7 @@ export default function SignInPage() {
                     </div>
                     <div className={styles.brandName}>Connect Quest</div>
                 </div>
+                <AuthModal/>
             </div>
         </div>
     );

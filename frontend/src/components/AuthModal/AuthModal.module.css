@@ -1,0 +1,138 @@
+.authModal * {
+    box-sizing: border-box;
+}
+
+.authModal {
+    position: relative;
+    width: 400px;
+    height: 50vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 32px 30px;
+    box-shadow: var(--shadow-lg);
+    font-family: "Inter", sans-serif;
+    color: var(--text);
+}
+
+.tabs {
+    display: flex;
+    background: #fbf3d8;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 26px;
+}
+
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 9px 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-soft);
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.active {
+    background: #fff;
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+}
+
+.authModal h1 {
+    font-size: 21px;
+    margin: 0 0 5px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-align: center;
+}
+
+.sub {
+    color: var(--text-soft);
+    font-size: 13.5px;
+    margin: 0 0 26px;
+    text-align: center;
+}
+
+.field {
+    margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  text-align: left;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-soft);
+  margin-bottom: 7px;
+}
+
+.inputWrap {
+    position: relative;
+}
+
+.inputWrap svg:first-child {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.inputWrap input {
+    width: 100%;
+    padding: 12px 40px 12px 40px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: "Inter", sans-serif;
+    font-size: 13.5px;
+    background: #fffbee;
+    color: var(--text);
+}
+
+.inputWrap input::placeholder {
+    color: var(--muted);
+}
+
+.inputWrap input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+}
+
+.primaryBtn {
+    width: 100%;
+    background: linear-gradient(135deg, #ffc833, var(--yellow-deep));
+    color: #3a2c00;
+    border: none;
+    padding: 14px;
+    border-radius: 13px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(245, 163, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.switchLine {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-top: 24px;
+}
+
+.switchLine a {
+    color: var(--pts-ink);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}

@@ -1,12 +1,24 @@
 :root {
   --bg: #fffbf0;
   --text: #2B2410;
+  --text-soft: #7a7050;
   --yellow-deep: #f5a300;
+  --border: #f3e7b8;
+  --surface: #ffffff;
+  --muted: #b5aa80;
+  --primary: #ffb800;
+  --primary-dark: #e8a400;
+  --pts-soft: #fff3d0;
+  --pts-ink: #a8730a;
+  --shadow-sm: 0 1px 2px rgba(43, 36, 16, 0.04), 0 4px 14px rgba(245, 163, 0, 0.08);
+  --shadow-lg: 0 24px 60px rgba(245, 163, 0, 0.18), 0 4px 14px rgba(43, 36, 16, 0.06);
 }
 
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
-  height: 100vh; 
+  height: 100vh;
   overflow: hidden;
 }
