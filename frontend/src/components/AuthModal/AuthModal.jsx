@@ -55,7 +55,7 @@ export default function AuthModal() {
           </button>
 
           <div className={styles.switchLine}>
-            Don&apos;t have an account? <a onClick={() => setTab("signup")}>Sign up</a>
+            Don't have an account? <a onClick={() => setTab("signup")}>Sign up</a>
           </div>
         </form>
       ) : (
