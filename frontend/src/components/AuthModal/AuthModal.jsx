@@ -1,10 +1,39 @@
 import { useState } from "react";
+import { signIn, signUp } from "aws-amplify/auth";
 import styles from './AuthModal.module.css';
 
 export default function AuthModal() {
   const [tab, setTab] = useState("login");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [signupName, setSignupName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+
+  async function handleSignup(e) {
+    e.preventDefault();
+    await signUp({
+      username: signupEmail,
+      password: signupPassword,
+      options: { userAttributes: { email: signupEmail, name: signupName } },
+    });
+
+    await fetch("http://localhost:5000/api/confirm-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: signupEmail }),
+    });
+
+    await signIn({ username: signupEmail, password: signupPassword });
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    await signIn({ username: loginEmail, password: loginPassword });
+  }
 
   return (
+
     <div className={styles.authModal}>
       <div className={styles.tabs}>
         <div className={`${styles.tab} ${tab === "login" ? styles.active : ""}`} onClick={() => setTab("login")}>
@@ -16,7 +45,7 @@ export default function AuthModal() {
       </div>
 
       {tab === "login" ? (
-        <form>
+        <form onSubmit={handleLogin}>
           <h1>Welcome back</h1>
           <p className={styles.sub}>Log in to keep your streak going.</p>
 
@@ -30,6 +59,8 @@ export default function AuthModal() {
               <input
                 type="email"
                 placeholder="you@example.com"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
                 required
               />
             </div>
@@ -45,6 +76,8 @@ export default function AuthModal() {
               <input
                 type="password"
                 placeholder="••••••••"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
                 required
               />
             </div>
@@ -59,7 +92,7 @@ export default function AuthModal() {
           </div>
         </form>
       ) : (
-        <form >
+        <form onSubmit={handleSignup}>
           <h1>Create your account</h1>
           <p className={styles.sub}>Start completing quests and meeting people.</p>
 
@@ -73,6 +106,8 @@ export default function AuthModal() {
               <input
                 type="text"
                 placeholder="Amishi"
+                value={signupName}
+                onChange={(e) => setSignupName(e.target.value)}
                 required
               />
             </div>
@@ -88,6 +123,8 @@ export default function AuthModal() {
               <input
                 type="email"
                 placeholder="you@example.com"
+                value={signupEmail}
+                onChange={(e) => setSignupEmail(e.target.value)}
                 required
               />
             </div>
@@ -103,6 +140,8 @@ export default function AuthModal() {
               <input
                 type="password"
                 placeholder="••••••••"
+                value={signupPassword}
+                onChange={(e) => setSignupPassword(e.target.value)}
                 required
               />
             </div>
