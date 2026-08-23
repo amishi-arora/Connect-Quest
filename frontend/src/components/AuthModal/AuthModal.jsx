@@ -10,42 +10,60 @@ export default function AuthModal() {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
 
   async function handleSignup(e) {
     e.preventDefault();
+    setError("");
 
     if (signupPassword !== confirmPassword) {
-      alert("Passwords don't match");
+      setError("Passwords don't match");
       return;
     }
-    await signUp({
-      username: signupEmail,
-      password: signupPassword,
-      options: { userAttributes: { email: signupEmail, name: signupName } },
-    });
 
-    await fetch("http://localhost:3000/api/confirm-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: signupEmail }),
-    });
-    await signOut(); // clear any existing session before logging in as the new user
-    await signIn({ username: signupEmail, password: signupPassword });
+    try {
+      await signUp({
+        username: signupEmail,
+        password: signupPassword,
+        options: { userAttributes: { email: signupEmail, name: signupName } },
+      });
+
+      await fetch("http://localhost:3000/api/confirm-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: signupEmail }),
+      });
+
+      await signOut();
+      await signIn({ username: signupEmail, password: signupPassword });
+    } catch (err) {
+      setError(err.message || "Signup failed");
+    }
   }
 
   async function handleLogin(e) {
     e.preventDefault();
-    await signIn({ username: loginEmail, password: loginPassword });
+    setError("");
+    try {
+      await signIn({ username: loginEmail, password: loginPassword });
+    } catch (err) {
+      setError(err.message || "Login failed");
+    }
+  }
+
+  function switchTab(newTab) {
+    setError("");
+    setTab(newTab);
   }
 
   return (
 
     <div className={styles.authModal}>
       <div className={styles.tabs}>
-        <div className={`${styles.tab} ${tab === "login" ? styles.active : ""}`} onClick={() => setTab("login")}>
+        <div className={`${styles.tab} ${tab === "login" ? styles.active : ""}`} onClick={() => switchTab("login")}>
           Log in
         </div>
-        <div className={`${styles.tab} ${tab === "signup" ? styles.active : ""}`} onClick={() => setTab("signup")}>
+        <div className={`${styles.tab} ${tab === "signup" ? styles.active : ""}`} onClick={() => switchTab("signup")}>
           Sign up
         </div>
       </div>
@@ -89,12 +107,14 @@ export default function AuthModal() {
             </div>
           </div>
 
+          {error && <div className={styles.authError}>{error}</div>}
+
           <button type="submit" className={styles.primaryBtn}>
             Log In
           </button>
 
           <div className={styles.switchLine}>
-            Don't have an account? <a onClick={() => setTab("signup")}>Sign up</a>
+            Don't have an account? <a onClick={() => switchTab("signup")}>Sign up</a>
           </div>
         </form>
       ) : (
@@ -170,12 +190,14 @@ export default function AuthModal() {
             </div>
           </div>
 
+          {error && <div className={styles.authError}>{error}</div>}
+
           <button type="submit" className={styles.primaryBtn}>
             Create Account
           </button>
 
           <div className={styles.switchLine}>
-            Already have an account? <a onClick={() => setTab("login")}>Log in</a>
+            Already have an account? <a onClick={() => switchTab("login")}>Log in</a>
           </div>
         </form>
       )}
