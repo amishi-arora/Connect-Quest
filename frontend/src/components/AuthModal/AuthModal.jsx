@@ -11,11 +11,12 @@ export default function AuthModal() {
   const [signupPassword, setSignupPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSignup(e) {
     e.preventDefault();
     setError("");
-
+    setLoading(true);
     if (signupPassword !== confirmPassword) {
       setError("Passwords don't match");
       return;
@@ -38,16 +39,22 @@ export default function AuthModal() {
       await signIn({ username: signupEmail, password: signupPassword });
     } catch (err) {
       setError(err.message || "Signup failed");
+    } finally {
+      setLoading(false);
     }
   }
 
   async function handleLogin(e) {
     e.preventDefault();
+    setLoading(true);
     setError("");
     try {
+      await signOut();
       await signIn({ username: loginEmail, password: loginPassword });
     } catch (err) {
       setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -109,8 +116,8 @@ export default function AuthModal() {
 
           {error && <div className={styles.authError}>{error}</div>}
 
-          <button type="submit" className={styles.primaryBtn}>
-            Log In
+          <button type="submit" className={styles.primaryBtn} disabled={loading}>
+            {loading ? <span className={styles.spinner} /> : "Log In"}
           </button>
 
           <div className={styles.switchLine}>
@@ -192,8 +199,8 @@ export default function AuthModal() {
 
           {error && <div className={styles.authError}>{error}</div>}
 
-          <button type="submit" className={styles.primaryBtn}>
-            Create Account
+          <button type="submit" className={styles.primaryBtn} disabled={loading}>
+            {loading ? <span className={styles.spinner} /> : "Create Account"}
           </button>
 
           <div className={styles.switchLine}>
