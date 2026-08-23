@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import styles from "./ChallengeListPage.module.css";
 import ChallengeCard from "../../components/ChallengeCard/ChallengeCard";
+import ChallengeDetailPanel from "../../components/ChallengeDetailPanel/ChallengeDetailPanel";
 
 export default function ChallengeListPage() {
   const [challenges, setChallenges] = useState([]);
   const [totalPoints, setTotalPoints] = useState(0);
+  const [selectedChallenge, setSelectedChallenge] = useState(null);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   useEffect(() => {
     fetch(`http://localhost:3000/api/challenges`)
@@ -20,6 +23,15 @@ export default function ChallengeListPage() {
       })
       .catch((err) => console.error("Failed to load challenges:", err));
   }, []);
+
+  function openPanel(challenge) {
+    setSelectedChallenge(challenge);
+    setIsPanelOpen(true);
+  }
+
+  function closePanel() {
+    setIsPanelOpen(false);
+  }
 
   return (
     <div className={styles.page}>
@@ -45,9 +57,16 @@ export default function ChallengeListPage() {
         <p className={styles.sub}>Complete challenges to earn points and connect on campus.</p>
 
         {challenges.map((challenge) => (
-          <ChallengeCard key={challenge.id} challenge={challenge} />
+          <ChallengeCard key={challenge.id} challenge={challenge} onClick={openPanel} />
         ))}
       </main>
+
+      <ChallengeDetailPanel
+        challenge={selectedChallenge}
+        isOpen={isPanelOpen}
+        onClose={closePanel}
+      />
     </div>
+
   );
 }

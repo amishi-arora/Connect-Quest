@@ -1,5 +1,4 @@
 require("dotenv").config();
-console.log("AWS key loaded:", process.env.AWS_ACCESS_KEY_ID ? "yes" : "NO - missing");
 const express = require("express");
 const cors = require("cors");
 const { CognitoIdentityProviderClient, AdminConfirmSignUpCommand } = require("@aws-sdk/client-cognito-identity-provider");

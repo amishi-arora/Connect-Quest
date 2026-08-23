@@ -1,10 +1,10 @@
 import styles from "./ChallengeCard.module.css";
  
-export default function ChallengeCard({ challenge }) {
+export default function ChallengeCard({ challenge, onClick }) {
   const { title, description, points, completed } = challenge;
  
   return (
-    <div className={`${styles.card} ${completed ? styles.done : ""}`}>
+    <div onClick = {() => onClick(challenge)} className={`${styles.card} ${completed ? styles.done : ""}`}>
       <div className={styles.statusDot}>
         {completed ? (
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
