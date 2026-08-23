@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { signIn, signUp } from "aws-amplify/auth";
+import { signIn, signUp, signOut } from "aws-amplify/auth";
 import styles from './AuthModal.module.css';
 
 export default function AuthModal() {
@@ -18,12 +18,12 @@ export default function AuthModal() {
       options: { userAttributes: { email: signupEmail, name: signupName } },
     });
 
-    await fetch("http://localhost:5000/api/confirm-user", {
+    await fetch("http://localhost:3000/api/confirm-user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: signupEmail }),
     });
-
+    await signOut(); // clear any existing session before logging in as the new user
     await signIn({ username: signupEmail, password: signupPassword });
   }
 
