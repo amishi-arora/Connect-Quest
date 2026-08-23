@@ -3,9 +3,17 @@ console.log("AWS key loaded:", process.env.AWS_ACCESS_KEY_ID ? "yes" : "NO - mis
 const express = require("express");
 const cors = require("cors");
 const { CognitoIdentityProviderClient, AdminConfirmSignUpCommand } = require("@aws-sdk/client-cognito-identity-provider");
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, ScanCommand } = require("@aws-sdk/lib-dynamodb");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 const cognitoClient = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION })
+
+const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION });
+const docClient = DynamoDBDocumentClient.from(dynamoClient);
+
 
 // --- Middleware ---
 app.use(cors());
@@ -23,8 +31,18 @@ app.post("/api/confirm-user", async (req, res) => {
         );
         res.json({ confirmed: true });
     } catch (err) {
-        console.error(err); 
+        console.error(err);
         res.status(400).json({ message: err.message });
+    }
+});
+
+app.get("/api/challenges", async (req, res) => {
+    try {
+        const result = await docClient.send(new ScanCommand({ TableName: "Challenges" }));
+        res.json(result.Items);
+    } catch (err) {
+        console.error("Get challenges error:", err);
+        res.status(500).json({ message: err.message });
     }
 });
 

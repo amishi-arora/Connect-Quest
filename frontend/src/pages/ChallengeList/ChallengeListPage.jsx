@@ -2,57 +2,23 @@ import { useEffect, useState } from "react";
 import styles from "./ChallengeListPage.module.css";
 import ChallengeCard from "../../components/ChallengeCard/ChallengeCard";
 
-// Mock data
-const MOCK_CHALLENGES = [
-  {
-    id: "1",
-    title: "Join a study group",
-    description: "Participate in a study group to enhance your learning experience.",
-    points: 10,
-    completed: true,
-  },
-  {
-    id: "2",
-    title: "Explore a new campus spot",
-    description: "Discover a new location on campus you've never visited before.",
-    points: 5,
-    completed: false,
-  },
-  {
-    id: "3",
-    title: "Participate in a club event",
-    description: "Engage in a club activity to broaden your social network and skills.",
-    points: 15,
-    completed: false,
-  },
-  {
-    id: "4",
-    title: "Make a new friend",
-    description: "Strike up a conversation and connect with someone new on campus.",
-    points: 10,
-    completed: false,
-  },
-  {
-    id: "5",
-    title: "Snap a photo of campus art",
-    description: "Find and photograph a piece of art displayed somewhere on campus.",
-    points: 10,
-    completed: false,
-  },
-];
-
 export default function ChallengeListPage() {
   const [challenges, setChallenges] = useState([]);
   const [totalPoints, setTotalPoints] = useState(0);
 
   useEffect(() => {
-    // TODO: replace with a real fetch once GET /api/challenges exists:
-    setChallenges(MOCK_CHALLENGES);
+    fetch(`http://localhost:3000/api/challenges`)
+      .then((res) => res.json())
+      .then((data) => {
+        const withStatus = data.map((c) => ({ ...c, completed: false }));
+        setChallenges(withStatus);
 
-    const earned = MOCK_CHALLENGES
-      .filter((c) => c.completed)
-      .reduce((sum, c) => sum + c.points, 0);
-    setTotalPoints(earned);
+        const earned = withStatus
+          .filter((c) => c.completed)
+          .reduce((sum, c) => sum + c.points, 0);
+        setTotalPoints(earned);
+      })
+      .catch((err) => console.error("Failed to load challenges:", err));
   }, []);
 
   return (
