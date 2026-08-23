@@ -1,0 +1,84 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 216, 90, 0.45), transparent 46%),
+    radial-gradient(circle at 100% 10%, rgba(255, 184, 0, 0.19), transparent 41%),
+    radial-gradient(circle at 20% 100%, rgba(255, 200, 50, 0.22), transparent 41%),
+    var(--bg);
+}
+ 
+.header {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+ 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brandMark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #ffcb3d, var(--yellow-deep));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(245, 163, 0, 0.35);
+}
+.brandMark svg {
+  width: 17px;
+  height: 17px;
+}
+.brandName {
+  font-weight: 800;
+  font-size: 15.5px;
+  letter-spacing: -0.01em;
+}
+ 
+.headerPts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--pts-ink);
+  background: linear-gradient(145deg, #fff3d0, #ffe9a8);
+  border: 1px solid #f5da8a;
+  padding: 7px 14px;
+  border-radius: 100px;
+  box-shadow: var(--shadow-sm);
+}
+.headerPts svg {
+  width: 14px;
+  height: 14px;
+}
+ 
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 36px 20px 60px;
+}
+ 
+.main h1 {
+  font-size: 24px;
+  margin: 0 0 5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+ 
+.sub {
+  color: var(--text-soft);
+  font-size: 14px;
+  margin: 0 0 30px;
+}
+ 

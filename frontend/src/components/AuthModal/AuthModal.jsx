@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { signIn, signUp, signOut } from "aws-amplify/auth";
 import styles from './AuthModal.module.css';
 
 export default function AuthModal() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState("login");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -37,6 +39,7 @@ export default function AuthModal() {
 
       await signOut();
       await signIn({ username: signupEmail, password: signupPassword });
+      navigate("/challenges");
     } catch (err) {
       setError(err.message || "Signup failed");
     } finally {
@@ -51,6 +54,7 @@ export default function AuthModal() {
     try {
       await signOut();
       await signIn({ username: loginEmail, password: loginPassword });
+      navigate("/challenges");
     } catch (err) {
       setError(err.message || "Login failed");
     } finally {
