@@ -9,9 +9,15 @@ export default function AuthModal() {
   const [signupName, setSignupName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   async function handleSignup(e) {
     e.preventDefault();
+
+    if (signupPassword !== confirmPassword) {
+      alert("Passwords don't match");
+      return;
+    }
     await signUp({
       username: signupEmail,
       password: signupPassword,
@@ -142,6 +148,23 @@ export default function AuthModal() {
                 placeholder="••••••••"
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className={styles.field}>
+            <label>Confirm password</label>
+            <div className={styles.inputWrap}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="4" y="10" width="16" height="10" rx="2" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+              </svg>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
             </div>
