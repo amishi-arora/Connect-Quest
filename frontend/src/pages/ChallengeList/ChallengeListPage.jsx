@@ -12,10 +12,20 @@ export default function ChallengeListPage() {
   const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/challenges`)
-      .then((res) => res.json())
-      .then((data) => {
-        const withStatus = data.map((c) => ({ ...c, completed: false }));
+    const token = localStorage.getItem("token");
+
+    Promise.all([
+      fetch(`http://localhost:3000/api/challenges`).then((res) => res.json()),
+      fetch(`http://localhost:3000/api/progress`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then((res) => res.json()),
+    ])
+      .then(([challengesData, progressData]) => {
+        const completedIds = progressData.map((p) => p.challengeId);
+        const withStatus = challengesData.map((c) => ({
+          ...c,
+          completed: completedIds.includes(c.id),
+        }));
         setChallenges(withStatus);
 
         const earned = withStatus
@@ -23,7 +33,7 @@ export default function ChallengeListPage() {
           .reduce((sum, c) => sum + c.points, 0);
         setTotalPoints(earned);
       })
-      .catch((err) => console.error("Failed to load challenges:", err));
+      .catch((err) => console.error(err));
   }, []);
 
   function openPanel(challenge) {
