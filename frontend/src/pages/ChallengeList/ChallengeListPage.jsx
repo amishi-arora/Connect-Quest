@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "./ChallengeListPage.module.css";
+import ChallengeCard from "../../components/ChallengeCard/ChallengeCard";
 
 // Mock data
 const MOCK_CHALLENGES = [
@@ -77,10 +78,9 @@ export default function ChallengeListPage() {
         <h1>Challenge List</h1>
         <p className={styles.sub}>Complete challenges to earn points and connect on campus.</p>
 
-        {/* TODO: Define ChallengeCard component */}
-        {/* {challenges.map((challenge) => (
+        {challenges.map((challenge) => (
           <ChallengeCard key={challenge.id} challenge={challenge} />
-        ))} */}
+        ))}
       </main>
     </div>
   );

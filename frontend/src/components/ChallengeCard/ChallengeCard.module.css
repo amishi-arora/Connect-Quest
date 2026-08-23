@@ -1,0 +1,74 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 17px 19px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 13px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 163, 0, 0.16), 0 2px 6px rgba(43, 36, 16, 0.06);
+  border-color: #f0d77e;
+}
+
+.statusDot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fbf3d8;
+  border: 1.5px solid #f3e4a8;
+  color: var(--muted);
+}
+
+.card.done .statusDot {
+  background: var(--green-soft);
+  border-color: #c7e9d2;
+  color: var(--green);
+}
+
+.cardText {
+  flex: 1;
+  min-width: 0;
+}
+
+.cardText h4 {
+  font-size: 14.5px;
+  margin: 0 0 3px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cardText p {
+  font-size: 12.5px;
+  color: var(--text-soft);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.ptsPill {
+  font-size: 12px;
+  font-weight: 800;
+  background: linear-gradient(145deg, #ffe9a8, #ffd65c);
+  color: var(--pts-ink);
+  padding: 6px 12px;
+  border-radius: 100px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(245, 163, 0, 0.25);
+}
+
+.card.done .ptsPill {
+  background: var(--green-soft);
+  color: var(--green);
+  box-shadow: none;
+}
