@@ -1,0 +1,110 @@
+.celebrate {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(43, 36, 16, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.celebrate.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+ 
+.card {
+  position: relative;
+  background: var(--surface);
+  border-radius: 22px;
+  padding: 40px 32px;
+  width: 350px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(43, 36, 16, 0.25);
+  transform: scale(0.9);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+.celebrate.open .card {
+  transform: scale(1);
+}
+ 
+.checkCircle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  background: linear-gradient(145deg, #ffcb3d, var(--yellow-deep));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(245, 163, 0, 0.4);
+  position: relative;
+  z-index: 1;
+}
+.checkCircle svg {
+  width: 28px;
+  height: 28px;
+}
+ 
+.card h2 {
+  font-size: 20px;
+  margin: 0 0 6px;
+  font-weight: 800;
+  color: var(-text);
+  position: relative;
+  z-index: 1;
+}
+ 
+.sub {
+  font-size: 13px;
+  color: var(--text-soft);
+  margin-bottom: 22px;
+  position: relative;
+  z-index: 1;
+}
+ 
+.pointsEarned {
+  background: linear-gradient(145deg, #fff3d0, #ffe9a8);
+  border: 1px solid #f5da8a;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 22px;
+  position: relative;
+  z-index: 1;
+}
+.plabel {
+  font-size: 11px;
+  color: var(--pts-ink);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pnum {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--yellow-deep);
+  margin: 4px 0;
+}
+.ptotal {
+  font-size: 12px;
+  color: var(--text-soft);
+}
+ 
+.continueBtn {
+  width: 100%;
+  background: linear-gradient(135deg, #ffc833, var(--yellow-deep));
+  color: #3a2c00;
+  border: none;
+  padding: 14px;
+  border-radius: 13px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 8px 20px rgba(245, 163, 0, 0.35);
+}

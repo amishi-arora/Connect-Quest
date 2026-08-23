@@ -42,7 +42,7 @@
   cursor: pointer;
   margin-bottom: 20px;
   background: #fffbee;
-  color: var(--ink-soft);
+  color: var(--text-soft);
 }
 
 .ptsPill {
@@ -62,12 +62,12 @@
   margin: 0 0 8px;
   font-weight: 800;
   letter-spacing: -0.01em;
-  color: var(--ink);
+  color: var(--text);
 }
 
 .desc {
   font-size: 13.5px;
-  color: var(--ink-soft);
+  color: var(--text-soft);
   line-height: 1.5;
   margin: 0 0 26px;
 }
@@ -86,7 +86,7 @@
   gap: 9px;
   padding: 9px 0;
   font-size: 13.5px;
-  color: var(--ink);
+  color: var(--text);
   border-bottom: 1px solid #f6efce;
 }
 .reqItem:last-of-type {
@@ -114,7 +114,7 @@
 .fieldLabel {
   font-size: 13px;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--text);
   margin: 8px 0 8px;
 }
 
@@ -128,7 +128,7 @@ textarea {
   font-size: 13.5px;
   resize: vertical;
   background: #fffbee;
-  color: var(--ink);
+  color: var(--text);
   box-sizing: border-box;
 }
 textarea:focus {

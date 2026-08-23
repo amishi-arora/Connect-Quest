@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import styles from "./ChallengeListPage.module.css";
 import ChallengeCard from "../../components/ChallengeCard/ChallengeCard";
 import ChallengeDetailPanel from "../../components/ChallengeDetailPanel/ChallengeDetailPanel";
+import CelebrationModal from "../../components/CelebrationModal/CelebrationModal";
 
 export default function ChallengeListPage() {
   const [challenges, setChallenges] = useState([]);
   const [totalPoints, setTotalPoints] = useState(0);
   const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
 
   useEffect(() => {
     fetch(`http://localhost:3000/api/challenges`)
@@ -31,6 +33,22 @@ export default function ChallengeListPage() {
 
   function closePanel() {
     setIsPanelOpen(false);
+  }
+
+  async function handleSubmit(challenge, answer) {
+    console.log("Submitting:", challenge.id, answer);
+
+    setChallenges((prev) =>
+      prev.map((c) => (c.id === challenge.id ? { ...c, completed: true } : c))
+    );
+    setTotalPoints((prev) => prev + challenge.points);
+
+    closePanel();
+    setIsCelebrationOpen(true);
+  }
+
+  function closeCelebration() {
+    setIsCelebrationOpen(false);
   }
 
   return (
@@ -65,6 +83,14 @@ export default function ChallengeListPage() {
         challenge={selectedChallenge}
         isOpen={isPanelOpen}
         onClose={closePanel}
+        onSubmit={handleSubmit}
+      />
+
+      <CelebrationModal
+        isOpen={isCelebrationOpen}
+        challenge={selectedChallenge}
+        totalPoints={totalPoints}
+        onContinue={closeCelebration}
       />
     </div>
 

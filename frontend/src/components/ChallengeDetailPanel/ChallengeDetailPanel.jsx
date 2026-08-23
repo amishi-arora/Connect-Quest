@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styles from "./ChallengeDetailPanel.module.css";
 
-export default function ChallengeDetailPanel({ challenge, isOpen, onClose }) {
+export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSubmit }) {
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -11,6 +11,7 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose }) {
     e.preventDefault();
     setSubmitting(true);
     try {
+      onSubmit(challenge, answer)
       setAnswer("");
     } finally {
       setSubmitting(false);
