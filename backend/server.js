@@ -4,7 +4,7 @@ const cors = require("cors");
 const { CognitoIdentityProviderClient, AdminConfirmSignUpCommand } = require("@aws-sdk/client-cognito-identity-provider");
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { CognitoJwtVerifier } = require("aws-jwt-verify");
-const { DynamoDBDocumentClient, ScanCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, ScanCommand, QueryCommand, GetCommand } = require("@aws-sdk/lib-dynamodb");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -81,6 +81,43 @@ app.get("/api/progress", verifyCognitoToken, async (req, res) => {
         console.error(err);
         res.status(500).json({ message: err.message });
     }
+});
+
+app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
+  const challengeId = req.params.id;
+  const { answer } = req.body;
+
+  try {
+    const challengeResult = await docClient.send(
+      new GetCommand({
+        TableName: "Challenges",
+        Key: { id: challengeId },
+      })
+    );
+    const challenge = challengeResult.Item;
+
+    if (!challenge) {
+      return res.status(404).json({ message: "Challenge not found" });
+    }
+
+    await docClient.send(
+      new PutCommand({
+        TableName: "UserProgress",
+        Item: {
+          userId: req.user.sub,
+          challengeId,
+          status: "completed",
+          answer,
+          completedAt: new Date().toISOString(),
+        },
+      })
+    );
+
+    res.json({ success: true, pointsEarned: challenge.points });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
 });
 
 // -- Start Server --- 
