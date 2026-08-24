@@ -46,15 +46,31 @@ export default function ChallengeListPage() {
   }
 
   async function handleSubmit(challenge, answer) {
-    console.log("Submitting:", challenge.id, answer);
+    const token = localStorage.getItem("token");
 
-    setChallenges((prev) =>
-      prev.map((c) => (c.id === challenge.id ? { ...c, completed: true } : c))
-    );
-    setTotalPoints((prev) => prev + challenge.points);
+    try {
+      const res = await fetch(`http://localhost:3000/api/challenges/${challenge.id}/submit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ answer }),
+      });
 
-    closePanel();
-    setIsCelebrationOpen(true);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Submission failed");
+
+      setChallenges((prev) =>
+        prev.map((c) => (c.id === challenge.id ? { ...c, completed: true } : c))
+      );
+      setTotalPoints((prev) => prev + data.pointsEarned);
+
+      closePanel();
+      setIsCelebrationOpen(true);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   function closeCelebration() {
