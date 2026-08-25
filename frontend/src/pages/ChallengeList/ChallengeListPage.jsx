@@ -21,11 +21,19 @@ export default function ChallengeListPage() {
       }).then((res) => res.json()),
     ])
       .then(([challengesData, progressData]) => {
-        const completedIds = progressData.map((p) => p.challengeId);
-        const withStatus = challengesData.map((c) => ({
-          ...c,
-          completed: completedIds.includes(c.id),
-        }));
+        const progressByChallengeId = {};
+        progressData.forEach((p) => {
+          progressByChallengeId[p.challengeId] = p;
+        });
+
+        const withStatus = challengesData.map((c) => {
+          const progress = progressByChallengeId[c.id];
+          return {
+            ...c,
+            completed: Boolean(progress),
+            submittedAnswer: progress?.answer,
+          };
+        });
         setChallenges(withStatus);
 
         const earned = withStatus

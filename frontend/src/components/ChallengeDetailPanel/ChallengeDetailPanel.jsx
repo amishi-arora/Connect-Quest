@@ -11,7 +11,7 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
     e.preventDefault();
     setSubmitting(true);
     try {
-      onSubmit(challenge, answer)
+      await onSubmit(challenge, answer);
       setAnswer("");
     } finally {
       setSubmitting(false);
@@ -51,19 +51,36 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
           </>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.fieldLabel}>What did you accomplish?</div>
-          <textarea
-            placeholder="Describe what you did to complete this challenge. Be specific about your experience!"
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            required
-          />
+        {challenge.completed ? (
+          <div className={styles.doneBlock}>
+            <div className={styles.doneMessage}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              You've already completed this challenge
+            </div>
+            {challenge.submittedAnswer && (
+              <>
+                <div className={styles.fieldLabel}>What you accomplished</div>
+                <div className={styles.answerReadout}>{challenge.submittedAnswer}</div>
+              </>
+            )}
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className={styles.fieldLabel}>What did you accomplish?</div>
+            <textarea
+              placeholder="Describe what you did to complete this challenge. Be specific about your experience!"
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              required
+            />
 
-          <button type="submit" className={styles.submitBtn} disabled={submitting}>
-            {submitting ? "Submitting..." : "Submit challenge"}
-          </button>
-        </form>
+            <button type="submit" className={styles.submitBtn} disabled={submitting}>
+              {submitting ? "Submitting..." : "Submit challenge"}
+            </button>
+          </form>
+        )}
       </div>
     </>
   );
