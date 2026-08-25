@@ -14,7 +14,15 @@ const cognitoClient = new CognitoIdentityProviderClient({ region: process.env.AW
 const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-// -- Authorization --- 
+// -- Helpers --- 
+function getTodaysChallengeIndex(totalChallenges) {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 0);
+    const diff = now - startOfYear;
+    const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+    return dayOfYear % totalChallenges;
+} 
+// --- Authorization --- 
 const jwtVerifier = CognitoJwtVerifier.create({
     userPoolId: process.env.COGNITO_USER_POOL_ID,
     tokenUse: "id",
@@ -84,36 +92,65 @@ app.get("/api/progress", verifyCognitoToken, async (req, res) => {
 });
 
 app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
-  const challengeId = req.params.id;
-  const { answer } = req.body;
+    const challengeId = req.params.id;
+    const { answer } = req.body;
 
-  try {
-    const challengeResult = await docClient.send(
-      new GetCommand({
-        TableName: "Challenges",
-        Key: { id: challengeId },
-      })
-    );
-    const challenge = challengeResult.Item;
+    try {
+        const challengeResult = await docClient.send(
+            new GetCommand({
+                TableName: "Challenges",
+                Key: { id: challengeId },
+            })
+        );
+        const challenge = challengeResult.Item;
 
-    if (!challenge) {
-      return res.status(404).json({ message: "Challenge not found" });
+        if (!challenge) {
+            return res.status(404).json({ message: "Challenge not found" });
+        }
+
+        await docClient.send(
+            new PutCommand({
+                TableName: "UserProgress",
+                Item: {
+                    userId: req.user.sub,
+                    challengeId,
+                    status: "completed",
+                    answer,
+                    completedAt: new Date().toISOString(),
+                },
+            })
+        );
+
+        res.json({ success: true, pointsEarned: challenge.points });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
     }
+});
 
-    await docClient.send(
-      new PutCommand({
+app.get("/api/daily-challenge", verifyCognitoToken, async (req, res) => {
+  try {
+    const challengesResult = await docClient.send(new ScanCommand({ TableName: "Challenges" }));
+    const challenges = challengesResult.Items.sort((a, b) => Number(a.id) - Number(b.id));
+
+    const todaysIndex = getTodaysChallengeIndex(challenges.length);
+    const todaysChallenge = challenges[todaysIndex];
+
+    const progressResult = await docClient.send(
+      new QueryCommand({
         TableName: "UserProgress",
-        Item: {
-          userId: req.user.sub,
-          challengeId,
-          status: "completed",
-          answer,
-          completedAt: new Date().toISOString(),
+        KeyConditionExpression: "userId = :userId AND challengeId = :challengeId",
+        ExpressionAttributeValues: {
+          ":userId": req.user.sub,
+          ":challengeId": todaysChallenge.id,
         },
       })
     );
 
-    res.json({ success: true, pointsEarned: challenge.points });
+    res.json({
+      challenge: todaysChallenge,
+      completed: progressResult.Items.length > 0,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });
