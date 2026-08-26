@@ -123,7 +123,7 @@ export default function ChallengeListPage() {
         {challenges
           .filter((c) => c.id !== dailyChallengeId)
           .map((challenge) => (
-            <ChallengeCard key={challenge.id} challenge={challenge} onClick={openPanel} isDaily = {false} />
+            <ChallengeCard key={challenge.id} challenge={challenge} onClick={openPanel} isDaily={false} />
           ))}
       </main>
 
@@ -139,6 +139,7 @@ export default function ChallengeListPage() {
         challenge={selectedChallenge}
         totalPoints={totalPoints}
         onContinue={closeCelebration}
+        isDaily={selectedChallenge?.id === dailyChallengeId}
       />
     </div>
 

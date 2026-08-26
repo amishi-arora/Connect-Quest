@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import confetti from "canvas-confetti";
 import styles from "./CelebrationModal.module.css";
 
-export default function CelebrationModal({ isOpen, challenge, totalPoints, onContinue }) {
+export default function CelebrationModal({ isOpen, challenge, totalPoints, onContinue, isDaily }) {
   useEffect(() => {
     if (isOpen) {
       confetti({
@@ -33,7 +33,7 @@ export default function CelebrationModal({ isOpen, challenge, totalPoints, onCon
           </svg>
         </div>
 
-        <h2>Congratulations!</h2>
+          <h2>{isDaily ? "Daily challenge complete!" : "Congratulations!"}</h2>
         <div className={styles.sub}>
           You completed <strong>&quot;{challenge.title}&quot;</strong>
         </div>
