@@ -21,7 +21,25 @@ function getTodaysChallengeIndex(totalChallenges) {
     const diff = now - startOfYear;
     const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
     return dayOfYear % totalChallenges;
-} 
+}
+
+function getDateString(date) {
+    return date.toISOString().split("T")[0];
+}
+
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return getDateString(d);
+}
+
+async function getTodaysChallenge() {
+    const challengesResult = await docClient.send(new ScanCommand({ TableName: "Challenges" }));
+    const challenges = challengesResult.Items.sort((a, b) => Number(a.id) - Number(b.id));
+    const todaysIndex = getTodaysChallengeIndex(challenges.length);
+    return challenges[todaysIndex];
+}
+
 // --- Authorization --- 
 const jwtVerifier = CognitoJwtVerifier.create({
     userPoolId: process.env.COGNITO_USER_POOL_ID,
@@ -121,6 +139,30 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
             })
         );
 
+        const todaysChallenge = await getTodaysChallenge();
+        if (todaysChallenge.id === challengeId) {
+            const today = getDateString(new Date());
+            const yesterday = getYesterdayString();
+
+            const streakResult = await docClient.send(
+                new GetCommand({ TableName: "UserStreaks", Key: { userId: req.user.sub } })
+            );
+            const existing = streakResult.Item;
+
+            const newStreak = existing?.lastCompletedDate === yesterday ? existing.currentStreak + 1 : 1;
+
+            await docClient.send(
+                new PutCommand({
+                    TableName: "UserStreaks",
+                    Item: {
+                        userId: req.user.sub,
+                        currentStreak: newStreak,
+                        lastCompletedDate: today,
+                    },
+                })
+            );
+        }
+
         res.json({ success: true, pointsEarned: challenge.points });
     } catch (err) {
         console.error(err);
@@ -129,32 +171,28 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
 });
 
 app.get("/api/daily-challenge", verifyCognitoToken, async (req, res) => {
-  try {
-    const challengesResult = await docClient.send(new ScanCommand({ TableName: "Challenges" }));
-    const challenges = challengesResult.Items.sort((a, b) => Number(a.id) - Number(b.id));
+    try {
+        const todaysChallenge = getTodaysChallenge(); 
 
-    const todaysIndex = getTodaysChallengeIndex(challenges.length);
-    const todaysChallenge = challenges[todaysIndex];
+        const progressResult = await docClient.send(
+            new QueryCommand({
+                TableName: "UserProgress",
+                KeyConditionExpression: "userId = :userId AND challengeId = :challengeId",
+                ExpressionAttributeValues: {
+                    ":userId": req.user.sub,
+                    ":challengeId": todaysChallenge.id,
+                },
+            })
+        );
 
-    const progressResult = await docClient.send(
-      new QueryCommand({
-        TableName: "UserProgress",
-        KeyConditionExpression: "userId = :userId AND challengeId = :challengeId",
-        ExpressionAttributeValues: {
-          ":userId": req.user.sub,
-          ":challengeId": todaysChallenge.id,
-        },
-      })
-    );
-
-    res.json({
-      challenge: todaysChallenge,
-      completed: progressResult.Items.length > 0,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
-  }
+        res.json({
+            challenge: todaysChallenge,
+            completed: progressResult.Items.length > 0,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
 });
 
 // -- Start Server --- 
