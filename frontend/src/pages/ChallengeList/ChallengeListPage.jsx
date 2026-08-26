@@ -10,6 +10,8 @@ export default function ChallengeListPage() {
   const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
+  const [dailyChallengeId, setDailyChallengeId] = useState(null);
+  const dailyChallenge = challenges.find((c) => c.id === dailyChallengeId);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -19,8 +21,11 @@ export default function ChallengeListPage() {
       fetch(`http://localhost:3000/api/progress`, {
         headers: { Authorization: `Bearer ${token}` },
       }).then((res) => res.json()),
+      fetch(`http://localhost:3000/api/daily-challenge`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then((res) => res.json()),
     ])
-      .then(([challengesData, progressData]) => {
+      .then(([challengesData, progressData, dailyData]) => {
         const progressByChallengeId = {};
         progressData.forEach((p) => {
           progressByChallengeId[p.challengeId] = p;
@@ -35,6 +40,7 @@ export default function ChallengeListPage() {
           };
         });
         setChallenges(withStatus);
+        setDailyChallengeId(dailyData.challenge.id)
 
         const earned = withStatus
           .filter((c) => c.completed)
@@ -70,7 +76,7 @@ export default function ChallengeListPage() {
       if (!res.ok) throw new Error(data.message || "Submission failed");
 
       setChallenges((prev) =>
-        prev.map((c) => (c.id === challenge.id ? { ...c, completed: true } : c))
+        prev.map((c) => (c.id === challenge.id ? { ...c, completed: true, submittedAnswer: answer } : c))
       );
       setTotalPoints((prev) => prev + data.pointsEarned);
 
@@ -108,9 +114,17 @@ export default function ChallengeListPage() {
         <h1>Challenge List</h1>
         <p className={styles.sub}>Complete challenges to earn points and connect on campus.</p>
 
-        {challenges.map((challenge) => (
-          <ChallengeCard key={challenge.id} challenge={challenge} onClick={openPanel} />
-        ))}
+        {dailyChallenge && (
+          <ChallengeCard challenge={dailyChallenge} onClick={openPanel} isDaily />
+        )}
+
+        {dailyChallengeId && <div className={styles.sectionLabel}>Other Challenges</div>}
+
+        {challenges
+          .filter((c) => c.id !== dailyChallengeId)
+          .map((challenge) => (
+            <ChallengeCard key={challenge.id} challenge={challenge} onClick={openPanel} isDaily = {false} />
+          ))}
       </main>
 
       <ChallengeDetailPanel

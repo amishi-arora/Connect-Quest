@@ -81,4 +81,13 @@
   font-size: 14px;
   margin: 0 0 30px;
 }
+
+.sectionLabel {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin: 22px 0 12px;
+}
  

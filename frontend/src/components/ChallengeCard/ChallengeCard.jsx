@@ -1,10 +1,10 @@
 import styles from "./ChallengeCard.module.css";
- 
-export default function ChallengeCard({ challenge, onClick }) {
+
+export default function ChallengeCard({ challenge, onClick, isDaily }) {
   const { title, description, points, completed } = challenge;
- 
+
   return (
-    <div onClick = {() => onClick(challenge)} className={`${styles.card} ${completed ? styles.done : ""}`}>
+    <div onClick={() => onClick(challenge)} className={`${styles.card} ${completed ? styles.done : ""} ${isDaily ? styles.daily : ""}`}>
       <div className={styles.statusDot}>
         {completed ? (
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
@@ -16,14 +16,15 @@ export default function ChallengeCard({ challenge, onClick }) {
           </svg>
         )}
       </div>
- 
+
+
       <div className={styles.cardText}>
+        {isDaily && <div className={styles.dailyTag}>🔥 Today's Challenge</div>}
         <h4>{title}</h4>
         <p>{description}</p>
       </div>
- 
+
       <div className={styles.ptsPill}>+{points}</div>
     </div>
   );
 }
- 

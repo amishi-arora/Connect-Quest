@@ -72,3 +72,32 @@
   color: var(--green);
   box-shadow: none;
 }
+
+.daily {
+  border: 2px solid var(--primary);
+  box-shadow: 0 4px 16px rgba(245, 163, 0, 0.18);
+}
+
+.daily .statusDot {
+  background: var(--pts-soft);
+  border-color: #f5da8a;
+  color: var(--pts-ink);
+}
+
+.daily.done .statusDot {
+  background: var(--green-soft);
+  border-color: #c7e9d2;
+  color: var(--green);
+}
+
+.dailyTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pts-ink);
+  margin-bottom: 4px;
+}
