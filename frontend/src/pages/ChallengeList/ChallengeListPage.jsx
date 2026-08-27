@@ -11,6 +11,7 @@ export default function ChallengeListPage() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
   const [dailyChallengeId, setDailyChallengeId] = useState(null);
+  const [streak, setStreak] = useState(0);
   const dailyChallenge = challenges.find((c) => c.id === dailyChallengeId);
 
   useEffect(() => {
@@ -40,7 +41,8 @@ export default function ChallengeListPage() {
           };
         });
         setChallenges(withStatus);
-        setDailyChallengeId(dailyData.challenge.id)
+        setDailyChallengeId(dailyData.challenge.id);
+        setStreak(dailyData.streak);
 
         const earned = withStatus
           .filter((c) => c.completed)
@@ -79,7 +81,13 @@ export default function ChallengeListPage() {
         prev.map((c) => (c.id === challenge.id ? { ...c, completed: true, submittedAnswer: answer } : c))
       );
       setTotalPoints((prev) => prev + data.pointsEarned);
-
+      if (challenge.id === dailyChallenge.id) {
+        const dailyRes = await fetch(`${API_BASE}/api/daily-challenge`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const dailyData = await dailyRes.json();
+        setDailyStreak(dailyData.streak);
+      }
       closePanel();
       setIsCelebrationOpen(true);
     } catch (err) {
@@ -113,6 +121,12 @@ export default function ChallengeListPage() {
       <main className={styles.main}>
         <h1>Challenge List</h1>
         <p className={styles.sub}>Complete challenges to earn points and connect on campus.</p>
+
+        {streak > 0 && (
+          <div className={styles.streakBanner}>
+            🔥 {streak} day streak — keep it going!
+          </div>
+        )}
 
         {dailyChallenge && (
           <ChallengeCard challenge={dailyChallenge} onClick={openPanel} isDaily />

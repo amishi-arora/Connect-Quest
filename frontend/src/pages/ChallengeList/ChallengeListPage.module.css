@@ -90,4 +90,18 @@
   color: var(--muted);
   margin: 22px 0 12px;
 }
+
+.streakBanner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pts-ink);
+  background: var(--pts-soft);
+  border: 1px solid #f5da8a;
+  padding: 7px 14px;
+  border-radius: 100px;
+  margin-bottom: 20px;
+}
  
