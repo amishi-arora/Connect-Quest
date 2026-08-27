@@ -172,7 +172,7 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
 
 app.get("/api/daily-challenge", verifyCognitoToken, async (req, res) => {
     try {
-        const todaysChallenge = getTodaysChallenge(); 
+        const todaysChallenge = await getTodaysChallenge();
 
         const progressResult = await docClient.send(
             new QueryCommand({
@@ -184,10 +184,23 @@ app.get("/api/daily-challenge", verifyCognitoToken, async (req, res) => {
                 },
             })
         );
+        const streakResult = await docClient.send(
+            new GetCommand({ TableName: "UserStreaks", Key: { userId: req.user.sub } })
+        );
+        const streakData = streakResult.Item;
+
+        const today = getDateString(new Date());
+        const yesterday = getYesterdayString();
+
+        let displayStreak = 0;
+        if (streakData?.lastCompletedDate === today || streakData?.lastCompletedDate === yesterday) {
+            displayStreak = streakData.currentStreak;
+        }
 
         res.json({
             challenge: todaysChallenge,
             completed: progressResult.Items.length > 0,
+            streak: displayStreak,
         });
     } catch (err) {
         console.error(err);
