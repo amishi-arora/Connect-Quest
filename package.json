@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1119.0",
     "aws-amplify": "^6.20.0"
   }
 }
