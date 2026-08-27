@@ -11,6 +11,7 @@ const challenges = [
     title: "Join a study group",
     description: "Participate in a study group to enhance your learning experience.",
     points: 10,
+    submissionType: "text",
     requirements: [
       "Find or create a study group with at least 2 other people.",
       "Attend one full session.",
@@ -22,10 +23,11 @@ const challenges = [
     title: "Explore a new campus spot",
     description: "Discover a new location on campus you've never visited before.",
     points: 5,
+    submissionType: "photo",
     requirements: [
       "Select a location you have never been to on campus.",
       "Spend at least 10 minutes there.",
-      "Take a photo or make a note of what you discovered.",
+      "Take a photo of what you discovered.",
     ],
   },
   {
@@ -33,6 +35,7 @@ const challenges = [
     title: "Participate in a club event",
     description: "Engage in a club activity to broaden your social network and skills.",
     points: 15,
+    submissionType: "text",
     requirements: [
       "Attend a club meeting or event.",
       "Talk to at least one new person.",
@@ -44,6 +47,7 @@ const challenges = [
     title: "Make a new friend",
     description: "Strike up a conversation and connect with someone new on campus.",
     points: 10,
+    submissionType: "text",
     requirements: [
       "Introduce yourself to someone you haven't met before.",
       "Have a conversation of at least 5 minutes.",
@@ -55,10 +59,10 @@ const challenges = [
     title: "Snap a photo of campus art",
     description: "Find and photograph a piece of art displayed somewhere on campus.",
     points: 10,
+    submissionType: "photo",
     requirements: [
       "Find a piece of art displayed somewhere on campus.",
       "Take a photo of it.",
-      "Note where you found it.",
     ],
   },
   {
@@ -66,10 +70,10 @@ const challenges = [
     title: "Try a new dining hall dish",
     description: "Step outside your usual order and try something you've never eaten before.",
     points: 5,
+    submissionType: "photo",
     requirements: [
       "Order or try a dish you've never had before.",
-      "Eat at least a full portion.",
-      "Rate it out of 5 stars.",
+      "Take a photo of it.",
     ],
   },
   {
@@ -77,6 +81,7 @@ const challenges = [
     title: "Attend a guest lecture",
     description: "Sit in on a talk or lecture outside your usual classes.",
     points: 15,
+    submissionType: "text",
     requirements: [
       "Find a guest lecture or open talk happening on campus.",
       "Attend the full session.",
@@ -88,6 +93,7 @@ const challenges = [
     title: "Visit the career center",
     description: "Stop by the career center to check out available resources.",
     points: 10,
+    submissionType: "text",
     requirements: [
       "Visit the career center in person.",
       "Ask about one resource (resume review, job board, etc.).",
@@ -99,6 +105,7 @@ const challenges = [
     title: "Join an intramural sport",
     description: "Sign up for or attend an intramural sports session.",
     points: 15,
+    submissionType: "text",
     requirements: [
       "Find an intramural team or drop-in session.",
       "Participate in one game or practice.",
@@ -110,6 +117,7 @@ const challenges = [
     title: "Sit with someone new at a meal",
     description: "Instead of eating alone or with the same group, sit with someone new.",
     points: 10,
+    submissionType: "text",
     requirements: [
       "Sit with at least one person you don't usually eat with.",
       "Have a conversation during the meal.",
@@ -121,6 +129,7 @@ const challenges = [
     title: "Visit the library's quiet study floor",
     description: "Find a focused study spot in the library you haven't used before.",
     points: 5,
+    submissionType: "text",
     requirements: [
       "Locate a study floor or room you haven't studied in before.",
       "Study there for at least 30 minutes.",
@@ -132,6 +141,7 @@ const challenges = [
     title: "Attend a club info fair or tabling event",
     description: "Check out a student org fair or tabling event on campus.",
     points: 10,
+    submissionType: "text",
     requirements: [
       "Visit at least 3 different tables or booths.",
       "Ask a question at one of them.",
@@ -143,6 +153,7 @@ const challenges = [
     title: "Go to a professor's office hours",
     description: "Attend office hours for one of your classes, even just to say hi.",
     points: 10,
+    submissionType: "text",
     requirements: [
       "Attend a professor or TA's office hours.",
       "Ask at least one question.",
@@ -154,6 +165,7 @@ const challenges = [
     title: "Attend a cultural or performance event",
     description: "Go to a cultural showcase, concert, or performance on campus.",
     points: 15,
+    submissionType: "text",
     requirements: [
       "Attend a cultural event, concert, or performance.",
       "Stay for the full event.",
@@ -165,6 +177,7 @@ const challenges = [
     title: "Use the campus gym or rec center",
     description: "Get a workout in at the campus gym or recreation center.",
     points: 10,
+    submissionType: "text",
     requirements: [
       "Visit the gym or rec center.",
       "Complete a workout of at least 20 minutes.",
@@ -176,10 +189,10 @@ const challenges = [
     title: "Photograph a piece of campus architecture",
     description: "Find and photograph a building or structure with interesting design.",
     points: 5,
+    submissionType: "photo",
     requirements: [
       "Find a building or structure on campus you find visually interesting.",
       "Take a photo of it.",
-      "Note what stood out to you.",
     ],
   },
   {
@@ -187,6 +200,7 @@ const challenges = [
     title: "Volunteer for a campus event",
     description: "Help out at or volunteer for an event happening on campus.",
     points: 20,
+    submissionType: "text",
     requirements: [
       "Find a volunteer opportunity for a campus event.",
       "Complete at least one shift or task.",
@@ -198,6 +212,7 @@ const challenges = [
     title: "Try a campus wellness resource",
     description: "Check out a wellness or mental health resource available to students.",
     points: 10,
+    submissionType: "text",
     requirements: [
       "Visit or attend a wellness resource (counseling center, meditation session, etc.).",
       "Participate in the full session or visit.",
@@ -209,10 +224,11 @@ const challenges = [
     title: "Watch the sunset or sunrise on campus",
     description: "Find a good spot on campus to watch the sunset or sunrise.",
     points: 5,
+    submissionType: "photo",
     requirements: [
       "Find a spot on campus with a good view.",
       "Watch the sunset or sunrise from there.",
-      "Take a photo or describe it.",
+      "Take a photo of it.",
     ],
   },
   {
@@ -220,6 +236,7 @@ const challenges = [
     title: "Start a study group of your own",
     description: "Instead of joining one, organize a study group for a class you're in.",
     points: 15,
+    submissionType: "text",
     requirements: [
       "Invite at least 2 classmates to a study session.",
       "Hold the session for at least 30 minutes.",
