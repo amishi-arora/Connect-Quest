@@ -64,35 +64,32 @@ export default function ChallengeListPage() {
   async function handleSubmit(challenge, answer) {
     const token = localStorage.getItem("token");
 
-    try {
-      const res = await fetch(`http://localhost:3000/api/challenges/${challenge.id}/submit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ answer }),
+    const res = await fetch(`http://localhost:3000/api/challenges/${challenge.id}/submit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ answer }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Submission failed");
+
+    setChallenges((prev) =>
+      prev.map((c) => (c.id === challenge.id ? { ...c, completed: true, submittedAnswer: answer } : c))
+    );
+    setTotalPoints((prev) => prev + data.pointsEarned);
+    if (challenge.id === dailyChallenge.id) {
+      const dailyRes = await fetch(`${API_BASE}/api/daily-challenge`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Submission failed");
-
-      setChallenges((prev) =>
-        prev.map((c) => (c.id === challenge.id ? { ...c, completed: true, submittedAnswer: answer } : c))
-      );
-      setTotalPoints((prev) => prev + data.pointsEarned);
-      if (challenge.id === dailyChallenge.id) {
-        const dailyRes = await fetch(`${API_BASE}/api/daily-challenge`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const dailyData = await dailyRes.json();
-        setDailyStreak(dailyData.streak);
-      }
-      closePanel();
-      setIsCelebrationOpen(true);
-    } catch (err) {
-      console.error(err);
+      const dailyData = await dailyRes.json();
+      setDailyStreak(dailyData.streak);
     }
+    closePanel();
+    setIsCelebrationOpen(true);
+
   }
 
   function closeCelebration() {

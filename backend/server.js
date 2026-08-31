@@ -43,7 +43,9 @@ async function getTodaysChallenge() {
 }
 
 async function verifyTextAnswer(requirements, answer) {
-    const prompt = `You are checking whether a student's submission for a campus challenge satisfies its requirements. If the answer is plausible and reasonably shows the requirements were met, approve it. Reject if the answer is clearly unrelated, empty of real content, or obviously does not attempt to meet the requirements.
+    const prompt = `You are checking whether a student's submission for a campus challenge satisfies its requirements. 
+    Be leneint - if the answer is plausible and reasonably shows the requirements were met, approve it. 
+    Reject if the answer is clearly unrelated, empty of real content, or obviously does not attempt to meet the requirements.
 
 Requirements:
 ${requirements.map((r) => `- ${r}`).join("\n")}
@@ -64,17 +66,17 @@ Respond with ONLY a JSON object, no other text, no markdown, no code fences, in 
         }),
     });
 
-  const response = await bedrockClient.send(command);
-  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-  const rawText = responseBody.output.message.content[0].text;
+    const response = await bedrockClient.send(command);
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    const rawText = responseBody.output.message.content[0].text;
 
-  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    console.error("No JSON found in Nova response:", rawText);
-    throw new Error("AI verification returned an unparseable response");
-  }
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+        console.error("No JSON found in Nova response:", rawText);
+        throw new Error("AI verification returned an unparseable response");
+    }
 
-  return JSON.parse(jsonMatch[0]);
+    return JSON.parse(jsonMatch[0]);
 }
 
 // --- Authorization --- 
@@ -165,7 +167,13 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
 
         if (challenge.submissionType === "text") {
             const verification = await verifyTextAnswer(challenge.requirements, answer);
-            console.log("Verification result:", verification);
+
+            if (!verification.approved) {
+                return res.status(422).json({
+                    message: "Your answer doesn't quite match the requirements.",
+                    reason: verification.reason,
+                });
+            }
         }
 
         await docClient.send(

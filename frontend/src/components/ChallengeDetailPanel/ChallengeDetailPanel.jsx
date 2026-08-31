@@ -1,18 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./ChallengeDetailPanel.module.css";
 
 export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSubmit }) {
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setError("");
+    setAnswer("");
+  }, [challenge]);
 
   if (!challenge) return null;
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setError("");
     setSubmitting(true);
     try {
       await onSubmit(challenge, answer);
       setAnswer("");
+    } catch (err) {
+      setError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -76,6 +85,7 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
               required
             />
 
+            {error && <div className={styles.submitError}>{error}</div>}
             <button type="submit" className={styles.submitBtn} disabled={submitting}>
               {submitting ? "Submitting..." : "Submit challenge"}
             </button>
