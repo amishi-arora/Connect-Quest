@@ -3,29 +3,66 @@ import styles from "./ChallengeDetailPanel.module.css";
 
 export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSubmit }) {
   const [answer, setAnswer] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     setError("");
     setAnswer("");
+    setPhotoFile(null);
+    setPhotoPreview(null);
   }, [challenge]);
 
   if (!challenge) return null;
+
+  const isPhotoChallenge = challenge.submissionType === "photo";
+
+  function handlePhotoChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result.split(",")[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSubmitting(true);
     try {
-      await onSubmit(challenge, answer);
+      if (isPhotoChallenge) {
+        if (!photoFile) {
+          throw new Error("Please select a photo before submitting.");
+        }
+        const base64Image = await fileToBase64(photoFile);
+        await onSubmit(challenge, base64Image);
+      } else {
+        await onSubmit(challenge, answer);
+      }
       setAnswer("");
+      setPhotoFile(null);
+      setPhotoPreview(null);
     } catch (err) {
       setError(err.message);
     } finally {
       setSubmitting(false);
     }
   }
+
 
   return (
     <>
@@ -68,7 +105,7 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
               </svg>
               You've already completed this challenge
             </div>
-            {challenge.submittedAnswer && (
+            {challenge.submittedAnswer && !isPhotoChallenge && (
               <>
                 <div className={styles.fieldLabel}>What you accomplished</div>
                 <div className={styles.answerReadout}>{challenge.submittedAnswer}</div>
@@ -77,13 +114,41 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <div className={styles.fieldLabel}>What did you accomplish?</div>
-            <textarea
-              placeholder="Describe what you did to complete this challenge. Be specific about your experience!"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              required
-            />
+            {isPhotoChallenge ? (
+              <>
+                <div className={styles.fieldLabel}>Upload your photo</div>
+                <label className={styles.photoDropzone}>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    onChange={handlePhotoChange}
+                    className={styles.photoInput}
+                  />
+                  {photoPreview ? (
+                    <img src={photoPreview} alt="Preview" className={styles.photoPreview} />
+                  ) : (
+                    <div className={styles.photoPlaceholder}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                      </svg>
+                      Tap to choose a photo
+                    </div>
+                  )}
+                </label>
+              </>
+            ) : (
+              <>
+                <div className={styles.fieldLabel}>What did you accomplish?</div>
+                <textarea
+                  placeholder="Describe what you did to complete this challenge. Be specific about your experience!"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  required
+                />
+              </>
+            )}
 
             {error && <div className={styles.submitError}>{error}</div>}
             <button type="submit" className={styles.submitBtn} disabled={submitting}>
