@@ -27,17 +27,38 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
     setPhotoPreview(URL.createObjectURL(file));
   }
 
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result.split(",")[1];
-        resolve(base64);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
+function fileToResizedBase64(file, maxDimension = 1200) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      let { width, height } = img;
+      if (width > height && width > maxDimension) {
+        height = Math.round((height / width) * maxDimension);
+        width = maxDimension;
+      } else if (height > maxDimension) {
+        width = Math.round((width / height) * maxDimension);
+        height = maxDimension;
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+      const base64 = dataUrl.split(",")[1];
+      resolve(base64);
+    };
+
+    img.onerror = reject;
+    img.src = objectUrl;
+  });
+}
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -48,7 +69,7 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
         if (!photoFile) {
           throw new Error("Please select a photo before submitting.");
         }
-        const base64Image = await fileToBase64(photoFile);
+        const base64Image = await fileToResizedBase64(photoFile);
         await onSubmit(challenge, base64Image);
       } else {
         await onSubmit(challenge, answer);
