@@ -38,6 +38,7 @@ export default function ChallengeListPage() {
             ...c,
             completed: Boolean(progress),
             submittedAnswer: progress?.answer,
+            submittedPhotoUrl: progress?.photoUrl,
           };
         });
         setChallenges(withStatus);
@@ -77,7 +78,7 @@ export default function ChallengeListPage() {
     if (!res.ok) throw new Error(data.message || "Submission failed");
 
     setChallenges((prev) =>
-      prev.map((c) => (c.id === challenge.id ? { ...c, completed: true, submittedAnswer: answer } : c))
+      prev.map((c) => (c.id === challenge.id ? { ...c, completed: true, submittedAnswer: answer, submittedPhotoUrl: data.photoUrl } : c))
     );
     setTotalPoints((prev) => prev + data.pointsEarned);
     if (challenge.id === dailyChallenge.id) {

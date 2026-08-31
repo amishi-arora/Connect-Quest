@@ -200,7 +200,22 @@ app.get("/api/progress", verifyCognitoToken, async (req, res) => {
                 ExpressionAttributeValues: { ":userId": req.user.sub },
             })
         );
-        res.json(result.Items);
+
+        const itemsWithUrls = await Promise.all(
+            result.Items.map(async (item) => {
+                if (item.photoKey) {
+                    const url = await getSignedUrl(
+                        s3Client,
+                        new GetObjectCommand({ Bucket: process.env.S3_BUCKET_NAME, Key: item.photoKey }),
+                        { expiresIn: 3600 } // valid for 1 hour
+                    );
+                    return { ...item, photoUrl: url };
+                }
+                return item;
+            })
+        );
+
+        res.json(itemsWithUrls);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: err.message });
@@ -239,8 +254,14 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
         }
 
         let photoKey = null;
+        let photoUrl = null;
         if (challenge.submissionType === "photo") {
             photoKey = await uploadPhotoToS3(req.user.sub, challengeId, submission);
+            photoUrl = await getSignedUrl(
+                s3Client,
+                new GetObjectCommand({ Bucket: process.env.S3_BUCKET_NAME, Key: photoKey }),
+                { expiresIn: 3600 }
+            );
         }
 
 
@@ -282,7 +303,7 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
             );
         }
 
-        res.json({ success: true, pointsEarned: challenge.points });
+        res.json({ success: true, pointsEarned: challenge.points, photoUrl });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: err.message });
