@@ -6,12 +6,14 @@ const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-be
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { CognitoJwtVerifier } = require("aws-jwt-verify");
 const { DynamoDBDocumentClient, ScanCommand, QueryCommand, GetCommand, PutCommand } = require("@aws-sdk/lib-dynamodb");
+const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const cognitoClient = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION })
-
+const s3Client = new S3Client({ region: process.env.AWS_REGION });
 const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 const bedrockClient = new BedrockRuntimeClient({ region: process.env.AWS_REGION });
@@ -142,6 +144,22 @@ async function verifyCognitoToken(req, res, next) {
     }
 }
 
+async function uploadPhotoToS3(userId, challengeId, base64Image) {
+    const buffer = Buffer.from(base64Image, "base64");
+    const key = `${userId}/${challengeId}.jpg`;
+
+    await s3Client.send(
+        new PutObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: key,
+            Body: buffer,
+            ContentType: "image/jpeg",
+        })
+    );
+
+    return key;
+}
+
 // --- Middleware ---
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
@@ -220,6 +238,11 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
             });
         }
 
+        let photoKey = null;
+        if (challenge.submissionType === "photo") {
+            photoKey = await uploadPhotoToS3(req.user.sub, challengeId, submission);
+        }
+
 
         await docClient.send(
             new PutCommand({
@@ -228,7 +251,8 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
                     userId: req.user.sub,
                     challengeId,
                     status: "completed",
-                    submission,
+                    answer: challenge.submissionType === "photo" ? null : submission,
+                    photoKey,
                     completedAt: new Date().toISOString(),
                 },
             })
