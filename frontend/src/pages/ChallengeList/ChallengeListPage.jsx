@@ -70,7 +70,7 @@ export default function ChallengeListPage() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ answer }),
+      body: JSON.stringify({ submission: answer }),
     });
 
     const data = await res.json();

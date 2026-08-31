@@ -86,6 +86,47 @@ const jwtVerifier = CognitoJwtVerifier.create({
     clientId: process.env.COGNITO_CLIENT_ID,
 });
 
+async function verifyPhotoAnswer(requirements, base64Image) {
+    const prompt = `You are checking whether a photo satisfies a campus challenge's requirements. 
+    Be Lenient — if the photo plausibly shows what was asked for, approve it. 
+    Rject if the photo is clearly unrelated or doesn't attempt to show what was requested.
+
+Requirements:
+${requirements.map((r) => `- ${r}`).join("\n")}
+
+Respond with ONLY a JSON object, no other text, no markdown, no code fences, in this exact format:
+{"approved": true or false, "reason": "one short sentence explaining why"}`;
+
+    const command = new InvokeModelCommand({
+        modelId: "amazon.nova-lite-v1:0",
+        contentType: "application/json",
+        accept: "application/json",
+        body: JSON.stringify({
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        { image: { format: "jpeg", source: { bytes: base64Image } } },
+                        { text: prompt },
+                    ],
+                },
+            ],
+            inferenceConfig: { maxTokens: 200, temperature: 0 },
+        }),
+    });
+
+    const response = await bedrockClient.send(command);
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    const rawText = responseBody.output.message.content[0].text;
+
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+        console.error("No JSON found in Nova response:", rawText);
+        throw new Error("AI verification returned an unparseable response");
+    }
+    return JSON.parse(jsonMatch[0]);
+}
+
 async function verifyCognitoToken(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith("Bearer ")) {
@@ -103,7 +144,7 @@ async function verifyCognitoToken(req, res, next) {
 
 // --- Middleware ---
 app.use(cors());
-app.use(express.json()); // required so req.body works in confirmUser.js
+app.use(express.json({ limit: "10mb" }));
 
 // --- Routes ---
 app.post("/api/confirm-user", async (req, res) => {
@@ -150,7 +191,7 @@ app.get("/api/progress", verifyCognitoToken, async (req, res) => {
 
 app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
     const challengeId = req.params.id;
-    const { answer } = req.body;
+    const { submission } = req.body;
 
     try {
         const challengeResult = await docClient.send(
@@ -165,16 +206,20 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
             return res.status(404).json({ message: "Challenge not found" });
         }
 
-        if (challenge.submissionType === "text") {
-            const verification = await verifyTextAnswer(challenge.requirements, answer);
-
-            if (!verification.approved) {
-                return res.status(422).json({
-                    message: "Your answer doesn't quite match the requirements.",
-                    reason: verification.reason,
-                });
-            }
+        let verification;
+        if (challenge.submissionType === "photo") {
+            verification = await verifyPhotoAnswer(challenge.requirements, submission);
+        } else {
+            verification = await verifyTextAnswer(challenge.requirements, submission);
         }
+
+        if (!verification.approved) {
+            return res.status(422).json({
+                message: "Your submission doesn't quite match the requirements.",
+                reason: verification.reason,
+            });
+        }
+
 
         await docClient.send(
             new PutCommand({
@@ -183,7 +228,7 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
                     userId: req.user.sub,
                     challengeId,
                     status: "completed",
-                    answer,
+                    submission,
                     completedAt: new Date().toISOString(),
                 },
             })
