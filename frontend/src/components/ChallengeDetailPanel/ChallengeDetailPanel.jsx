@@ -178,6 +178,11 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
             )}
 
             {error && <div className={styles.submitError}>{error}</div>}
+
+            <div className={styles.aiNote}>
+              Your submission is automatically reviewed by AI
+            </div>
+
             <button type="submit" className={styles.submitBtn} disabled={submitting}>
               {submitting ? "Submitting..." : "Submit challenge"}
             </button>
