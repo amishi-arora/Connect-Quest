@@ -256,7 +256,10 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
         let verification;
         if (challenge.submissionType === "photo") {
             verification = await verifyPhotoAnswer(challenge.requirements, submission);
-        } else {
+        } else if (challenge.submissionType === "text") {
+            if (submission.length > 500) {
+                return res.status(400).json({ message: "Your answer is too long — please keep it under 500 characters." });
+            }
             verification = await verifyTextAnswer(challenge.requirements, submission);
         }
 
