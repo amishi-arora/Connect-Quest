@@ -248,16 +248,8 @@ textarea:focus {
 }
 
 .aiNote {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   font-size: 11.5px;
   color: var(--muted);
   font-weight: 600;
-  margin: 10px 0 16px;
-}
-.aiNote svg {
-  width: 13px;
-  height: 13px;
-  flex-shrink: 0;
+  margin: 5px 0 14px;
 }
