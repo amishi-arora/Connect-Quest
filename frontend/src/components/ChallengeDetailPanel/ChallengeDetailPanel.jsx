@@ -172,8 +172,12 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
                   placeholder="Describe what you did to complete this challenge. Be specific about your experience!"
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
+                  maxLength={500}
                   required
                 />
+                <div className={styles.charCount}>
+                  {answer.length}/500
+                </div>
               </>
             )}
 
