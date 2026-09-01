@@ -60,6 +60,8 @@ name which exact requirement wasn't addressed, or quote/paraphrase what they wro
 Do NOT write generic reasons. Write the reason in a warm, encouraging tone — like a friendly peer giving quick feedback, 
 not a strict grader. Still be specific and concrete about what's missing, as instructed above.
 
+Before rejecting, re-read the answer carefully to make sure your stated reason is actually accurate.
+
 Respond with ONLY a JSON object, no other text, no markdown, no code fences, in this exact format:
 {"approved": true or false, "reason": "one short sentence explaining why"}`;
 
@@ -105,6 +107,8 @@ If you reject the submission, your reason must be specific and reference the stu
 name which exact requirement wasn't addressed, or quote/paraphrase what they wrote and explain what's missing from it. 
 Do NOT write generic reasons. Write the reason in a warm, encouraging tone — like a friendly peer giving quick feedback, 
 not a strict grader. Still be specific and concrete about what's missing, as instructed above.
+
+Before rejecting, re-read the answer carefully to make sure your stated reason is actually accurate.
 
 Respond with ONLY a JSON object, no other text, no markdown, no code fences, in this exact format:
 {"approved": true or false, "reason": "one short sentence explaining why"}`;
