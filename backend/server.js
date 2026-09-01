@@ -88,12 +88,6 @@ Respond with ONLY a JSON object, no other text, no markdown, no code fences, in 
     return JSON.parse(jsonMatch[0]);
 }
 
-// --- Authorization --- 
-const jwtVerifier = CognitoJwtVerifier.create({
-    userPoolId: process.env.COGNITO_USER_POOL_ID,
-    tokenUse: "id",
-    clientId: process.env.COGNITO_CLIENT_ID,
-});
 
 async function verifyPhotoAnswer(requirements, base64Image) {
     const prompt = `You are checking whether a photo satisfies a campus challenge's requirements. 
@@ -143,20 +137,6 @@ Respond with ONLY a JSON object, no other text, no markdown, no code fences, in 
     return JSON.parse(jsonMatch[0]);
 }
 
-async function verifyCognitoToken(req, res, next) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith("Bearer ")) {
-        return res.status(401).json({ message: "Missing or malformed authorization header" });
-    }
-    const token = authHeader.split(" ")[1];
-    try {
-        const payload = await jwtVerifier.verify(token);
-        req.user = { sub: payload.sub, email: payload.email, name: payload.name };
-        next();
-    } catch (err) {
-        return res.status(401).json({ message: "Invalid or expired token" });
-    }
-}
 
 async function uploadPhotoToS3(userId, challengeId, base64Image) {
     const buffer = Buffer.from(base64Image, "base64");
@@ -172,6 +152,47 @@ async function uploadPhotoToS3(userId, challengeId, base64Image) {
     );
 
     return key;
+}
+
+function isValidImageBase64(base64String) {
+    try {
+        const buffer = Buffer.from(base64String, "base64");
+
+        // Reject anything absurdly large
+        if (buffer.length > 5 * 1024 * 1024) {
+            return false;
+        }
+
+        // Check magic bytes — real JPEGs and PNGs start with a specific byte signature
+        const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8;
+        const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
+
+        return isJpeg || isPng;
+    } catch {
+        return false;
+    }
+}
+
+// --- Authorization --- 
+const jwtVerifier = CognitoJwtVerifier.create({
+    userPoolId: process.env.COGNITO_USER_POOL_ID,
+    tokenUse: "id",
+    clientId: process.env.COGNITO_CLIENT_ID,
+});
+
+async function verifyCognitoToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+        return res.status(401).json({ message: "Missing or malformed authorization header" });
+    }
+    const token = authHeader.split(" ")[1];
+    try {
+        const payload = await jwtVerifier.verify(token);
+        req.user = { sub: payload.sub, email: payload.email, name: payload.name };
+        next();
+    } catch (err) {
+        return res.status(401).json({ message: "Invalid or expired token" });
+    }
 }
 
 // --- Middleware ---
@@ -255,6 +276,9 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
 
         let verification;
         if (challenge.submissionType === "photo") {
+            if (!isValidImageBase64(submission)) {
+                return res.status(400).json({ message: "Invalid image. Please upload a JPEG or PNG photo." });
+            }
             verification = await verifyPhotoAnswer(challenge.requirements, submission);
         } else if (challenge.submissionType === "text") {
             if (submission.length > 500) {
@@ -323,7 +347,7 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
         res.json({ success: true, pointsEarned: challenge.points, photoUrl });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Something went wrong. Please try again."});
+        res.status(500).json({ message: "Something went wrong. Please try again." });
     }
 });
 
