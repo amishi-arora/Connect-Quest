@@ -201,7 +201,7 @@ app.get("/api/challenges", verifyCognitoToken, async (req, res) => {
         res.json(result.Items);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: "Something went wrong. Please try again." });
     }
 });
 
@@ -232,7 +232,7 @@ app.get("/api/progress", verifyCognitoToken, async (req, res) => {
         res.json(itemsWithUrls);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: "Something went wrong. Please try again." });
     }
 });
 
@@ -323,7 +323,7 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
         res.json({ success: true, pointsEarned: challenge.points, photoUrl });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: "Something went wrong. Please try again."});
     }
 });
 
@@ -361,7 +361,7 @@ app.get("/api/daily-challenge", verifyCognitoToken, async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: "Something went wrong. Please try again." });
     }
 });
 
