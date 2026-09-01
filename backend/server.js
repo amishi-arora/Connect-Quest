@@ -195,7 +195,7 @@ app.post("/api/confirm-user", async (req, res) => {
     }
 });
 
-app.get("/api/challenges", async (req, res) => {
+app.get("/api/challenges", verifyCognitoToken, async (req, res) => {
     try {
         const result = await docClient.send(new ScanCommand({ TableName: "Challenges" }));
         res.json(result.Items);
