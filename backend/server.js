@@ -46,7 +46,7 @@ async function getTodaysChallenge() {
 
 async function verifyTextAnswer(requirements, answer) {
     const prompt = `You are checking whether a student's submission for a campus challenge satisfies its requirements. 
-    Be leneint - if the answer is plausible and reasonably shows the requirements were met, approve it. 
+    Be lenient - if the answer is plausible and reasonably shows the requirements were met, approve it. 
     Reject if the answer is clearly unrelated, empty of real content, or obviously does not attempt to meet the requirements.
 
 Requirements:
