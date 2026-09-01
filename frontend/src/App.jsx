@@ -20,7 +20,7 @@ export default function App() {
       <Route path="/" element={<SignInPage />} />
       <Route
         path="/challenges"
-        element={isTokenValid(token) ? <ChallengeListPage /> : <Navigate to="/login" />}
+        element={isTokenValid(token) ? <ChallengeListPage /> : <Navigate to="/" />}
       />
     </Routes>
   );

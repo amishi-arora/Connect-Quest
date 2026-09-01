@@ -18,7 +18,9 @@ export default function ChallengeListPage() {
     const token = localStorage.getItem("token");
 
     Promise.all([
-      fetch(`http://localhost:3000/api/challenges`).then((res) => res.json()),
+      fetch(`http://localhost:3000/api/challenges`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then((res) => res.json()),
       fetch(`http://localhost:3000/api/progress`, {
         headers: { Authorization: `Bearer ${token}` },
       }).then((res) => res.json()),
