@@ -55,6 +55,11 @@ ${requirements.map((r) => `- ${r}`).join("\n")}
 Student's answer:
 "${answer}"
 
+If you reject the submission, your reason must be specific and reference the student's actual answer — for example, 
+name which exact requirement wasn't addressed, or quote/paraphrase what they wrote and explain what's missing from it. 
+Do NOT write generic reasons. Write the reason in a warm, encouraging tone — like a friendly peer giving quick feedback, 
+not a strict grader. Still be specific and concrete about what's missing, as instructed above.
+
 Respond with ONLY a JSON object, no other text, no markdown, no code fences, in this exact format:
 {"approved": true or false, "reason": "one short sentence explaining why"}`;
 
@@ -95,6 +100,11 @@ async function verifyPhotoAnswer(requirements, base64Image) {
 
 Requirements:
 ${requirements.map((r) => `- ${r}`).join("\n")}
+
+If you reject the submission, your reason must be specific and reference the student's actual answer — for example, 
+name which exact requirement wasn't addressed, or quote/paraphrase what they wrote and explain what's missing from it. 
+Do NOT write generic reasons. Write the reason in a warm, encouraging tone — like a friendly peer giving quick feedback, 
+not a strict grader. Still be specific and concrete about what's missing, as instructed above.
 
 Respond with ONLY a JSON object, no other text, no markdown, no code fences, in this exact format:
 {"approved": true or false, "reason": "one short sentence explaining why"}`;

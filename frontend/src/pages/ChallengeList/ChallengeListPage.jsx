@@ -75,7 +75,7 @@ export default function ChallengeListPage() {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Submission failed");
+    if (!res.ok) throw new Error(data.reason || data.message || "Submission failed");
 
     setChallenges((prev) =>
       prev.map((c) => (c.id === challenge.id ? { ...c, completed: true, submittedAnswer: answer, submittedPhotoUrl: data.photoUrl } : c))
