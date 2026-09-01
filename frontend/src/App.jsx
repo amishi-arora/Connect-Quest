@@ -1,5 +1,5 @@
 import "./index.css";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import SignInPage from "./pages/SignInPage/SignInPage";
 import ChallengeListPage from "./pages/ChallengeList/ChallengeListPage"
 
