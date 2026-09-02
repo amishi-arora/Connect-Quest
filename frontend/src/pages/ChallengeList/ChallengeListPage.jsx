@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { signOut } from "aws-amplify/auth";
+import { useNavigate } from "react-router-dom";
 import styles from "./ChallengeListPage.module.css";
 import ChallengeCard from "../../components/ChallengeCard/ChallengeCard";
 import ChallengeDetailPanel from "../../components/ChallengeDetailPanel/ChallengeDetailPanel";
@@ -13,6 +15,7 @@ export default function ChallengeListPage() {
   const [dailyChallengeId, setDailyChallengeId] = useState(null);
   const [streak, setStreak] = useState(0);
   const dailyChallenge = challenges.find((c) => c.id === dailyChallengeId);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -54,6 +57,12 @@ export default function ChallengeListPage() {
       })
       .catch((err) => console.error(err));
   }, []);
+
+  async function handleLogout() {
+    await signOut();
+    localStorage.removeItem("token");
+    navigate("/");
+  }
 
   function openPanel(challenge) {
     setSelectedChallenge(challenge);
@@ -110,11 +119,21 @@ export default function ChallengeListPage() {
           </div>
           <div className={styles.brandName}>Connect Quest</div>
         </div>
-        <div className={styles.headerPts}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3">
-            <path d="M12 2l2.9 6.3L21 9.3l-4.6 4.5L17.5 20 12 16.8 6.5 20l1.1-6.2L3 9.3l6.1-1z" />
-          </svg>
-          {totalPoints} pts
+        <div className={styles.headerRight}>
+          <div className={styles.headerPts}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3">
+              <path d="M12 2l2.9 6.3L21 9.3l-4.6 4.5L17.5 20 12 16.8 6.5 20l1.1-6.2L3 9.3l6.1-1z" />
+            </svg>
+            {totalPoints} pts
+          </div>
+          <button className={styles.logoutBtn} onClick={handleLogout}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Log out
+          </button>
         </div>
       </header>
 

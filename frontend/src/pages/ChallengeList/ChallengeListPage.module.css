@@ -6,7 +6,7 @@
     radial-gradient(circle at 20% 100%, rgba(255, 200, 50, 0.22), transparent 41%),
     var(--bg);
 }
- 
+
 .header {
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(10px);
@@ -19,12 +19,13 @@
   top: 0;
   z-index: 5;
 }
- 
+
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .brandMark {
   width: 34px;
   height: 34px;
@@ -35,16 +36,18 @@
   justify-content: center;
   box-shadow: 0 3px 10px rgba(245, 163, 0, 0.35);
 }
+
 .brandMark svg {
   width: 17px;
   height: 17px;
 }
+
 .brandName {
   font-weight: 800;
   font-size: 15.5px;
   letter-spacing: -0.01em;
 }
- 
+
 .headerPts {
   display: flex;
   align-items: center;
@@ -58,24 +61,25 @@
   border-radius: 100px;
   box-shadow: var(--shadow-sm);
 }
+
 .headerPts svg {
   width: 14px;
   height: 14px;
 }
- 
+
 .main {
   max-width: 640px;
   margin: 0 auto;
   padding: 36px 20px 60px;
 }
- 
+
 .main h1 {
   font-size: 24px;
   margin: 0 0 5px;
   font-weight: 800;
   letter-spacing: -0.01em;
 }
- 
+
 .sub {
   color: var(--text-soft);
   font-size: 14px;
@@ -104,4 +108,26 @@
   border-radius: 100px;
   margin-bottom: 20px;
 }
- 
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 8px;
+}
+
+.logoutBtn:hover {
+  color: var(--text);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
