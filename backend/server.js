@@ -197,6 +197,7 @@ async function verifyCognitoToken(req, res, next) {
 
 // --- Middleware ---
 app.use(cors());
+app.use(helmet())
 app.use(express.json({ limit: "10mb" }));
 
 // --- Routes ---
