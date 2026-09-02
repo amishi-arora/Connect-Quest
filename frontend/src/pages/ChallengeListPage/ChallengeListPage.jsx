@@ -93,11 +93,11 @@ export default function ChallengeListPage() {
     );
     setTotalPoints((prev) => prev + data.pointsEarned);
     if (challenge.id === dailyChallenge.id) {
-      const dailyRes = await fetch(`${API_BASE}/api/daily-challenge`, {
+      const dailyRes = await fetch(`http://localhost:3000/api/daily-challenge`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const dailyData = await dailyRes.json();
-      setDailyStreak(dailyData.streak);
+      setStreak(dailyData.streak);
     }
     closePanel();
     setIsCelebrationOpen(true);

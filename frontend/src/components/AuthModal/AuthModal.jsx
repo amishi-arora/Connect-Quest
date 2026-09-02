@@ -19,12 +19,12 @@ export default function AuthModal() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    if (signupPassword !== confirmPassword) {
-      setError("Passwords don't match");
-      return;
-    }
-
     try {
+      if (signupPassword !== confirmPassword) {
+        setError("Passwords don't match");
+        return;
+      }
+
       await signUp({
         username: signupEmail,
         password: signupPassword,
@@ -37,8 +37,16 @@ export default function AuthModal() {
         body: JSON.stringify({ email: signupEmail }),
       });
 
-      await signOut();
-      await signIn({ username: signupEmail, password: signupPassword });
+      try {
+        await signIn({ username: signupEmail, password: signupPassword });
+      } catch (err) {
+        if (err.name === "UserAlreadyAuthenticatedException") {
+          await signOut();
+          await signIn({ username: signupEmail, password: signupPassword });
+        } else {
+          throw err;
+        }
+      }
 
       const session = await fetchAuthSession();
       localStorage.setItem("token", session.tokens?.idToken?.toString());
@@ -56,9 +64,16 @@ export default function AuthModal() {
     setLoading(true);
     setError("");
     try {
-      await signOut();
-      await signIn({ username: loginEmail, password: loginPassword });
-
+      try {
+        await signIn({ username: loginEmail, password: loginPassword });
+      } catch (err) {
+        if (err.name === "UserAlreadyAuthenticatedException") {
+          await signOut();
+          await signIn({ username: loginEmail, password: loginPassword });
+        } else {
+          throw err;
+        }
+      }
       const session = await fetchAuthSession();
       localStorage.setItem("token", session.tokens?.idToken?.toString());
 
@@ -133,7 +148,10 @@ export default function AuthModal() {
           </button>
 
           <div className={styles.switchLine}>
-            Don't have an account? <a onClick={() => switchTab("signup")}>Sign up</a>
+            Don't have an account?{" "}
+            <button type="button" className={styles.linkBtn} onClick={() => switchTab("signup")}>
+              Sign up
+            </button>
           </div>
         </form>
       ) : (
@@ -216,7 +234,10 @@ export default function AuthModal() {
           </button>
 
           <div className={styles.switchLine}>
-            Already have an account? <a onClick={() => switchTab("login")}>Log in</a>
+            Already have an account?{" "}
+            <button type="button" className={styles.linkBtn} onClick={() => switchTab("login")}>
+              Log in
+            </button>
           </div>
         </form>
       )}

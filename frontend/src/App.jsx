@@ -1,7 +1,6 @@
-import "./index.css";
 import { Routes, Route, Navigate } from "react-router-dom";
 import SignInPage from "./pages/SignInPage/SignInPage";
-import ChallengeListPage from "./pages/ChallengeList/ChallengeListPage"
+import ChallengeListPage from "./pages/ChallengeListPage/ChallengeListPage"
 
 function isTokenValid(token) {
   if (!token) return false;
@@ -17,11 +16,12 @@ export default function App() {
   const token = localStorage.getItem("token");
   return (
     <Routes>
-      <Route path="/" element={<SignInPage />} />
+      <Route path="/" element={isTokenValid(token) ? <Navigate to="/challenges" /> : <SignInPage />} />
       <Route
         path="/challenges"
         element={isTokenValid(token) ? <ChallengeListPage /> : <Navigate to="/" />}
       />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }

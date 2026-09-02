@@ -13,9 +13,9 @@ export default function CelebrationModal({ isOpen, challenge, totalPoints, onCon
           "#FFB800",
           "#FF8A3D",
           "#FF6B9D",
-          "#A78BFA", 
-          "#60A5FA", 
-          "#34D399", 
+          "#A78BFA",
+          "#60A5FA",
+          "#34D399",
         ]
       });
     }
@@ -33,7 +33,7 @@ export default function CelebrationModal({ isOpen, challenge, totalPoints, onCon
           </svg>
         </div>
 
-          <h2>{isDaily ? "Daily challenge complete!" : "Congratulations!"}</h2>
+        <h2>{isDaily ? "Daily challenge complete!" : "Congratulations!"}</h2>
         <div className={styles.sub}>
           You completed <strong>&quot;{challenge.title}&quot;</strong>
         </div>

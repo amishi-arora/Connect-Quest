@@ -23,6 +23,11 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
     const file = e.target.files[0];
     if (!file) return;
 
+    if (file.size > 20 * 1024 * 1024) {
+      setError("That file is too large. Please choose a smaller photo.");
+      return;
+    }
+
     setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
   }
@@ -55,7 +60,7 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
         resolve(base64);
       };
 
-      img.onerror = reject(new Error("The selected file isn't a valid image. Please choose a JPEG or PNG."));
+      img.onerror = () => reject(new Error("The selected file isn't a valid image. Please choose a JPEG or PNG."));
       img.src = objectUrl;
     });
   }

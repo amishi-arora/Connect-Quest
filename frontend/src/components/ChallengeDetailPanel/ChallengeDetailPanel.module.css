@@ -179,6 +179,12 @@ textarea:focus {
   flex-shrink: 0;
 }
 
+.doneBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .answerReadout {
   background: #fffbee;
   border: 1.5px solid var(--border);
