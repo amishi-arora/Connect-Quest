@@ -55,7 +55,7 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
         resolve(base64);
       };
 
-      img.onerror = reject;
+      img.onerror = reject(new Error("The selected file isn't a valid image. Please choose a JPEG or PNG."));
       img.src = objectUrl;
     });
   }
