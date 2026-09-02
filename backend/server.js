@@ -1,8 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-import helmet from "helmet"
-const { CognitoIdentityProviderClient, AdminConfirmSignUpCommand } = require("@aws-sdk/client-cognito-identity-provider");
+const helmet = require("helmet"); const { CognitoIdentityProviderClient, AdminConfirmSignUpCommand } = require("@aws-sdk/client-cognito-identity-provider");
 const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { CognitoJwtVerifier } = require("aws-jwt-verify");
