@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFCB3D" />
+      <stop offset="100%" stop-color="#F5A300" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#brandGradient)" />
+  <g transform="translate(14, 14) scale(1.5)">
+    <path d="M12 2l2.9 6.3L21 9.3l-4.6 4.5L17.5 20 12 16.8 6.5 20l1.1-6.2L3 9.3l6.1-1z"
+          fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>
+ 
