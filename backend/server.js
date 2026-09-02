@@ -318,6 +318,7 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
                     photoKey,
                     completedAt: new Date().toISOString(),
                 },
+                ConditionExpression: "attribute_not_exists(userId)",
             })
         );
 
@@ -347,6 +348,9 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
 
         res.json({ success: true, pointsEarned: challenge.points, photoUrl });
     } catch (err) {
+        if (err.name === "ConditionalCheckFailedException") {
+            return res.status(409).json({ message: "You've already completed this challenge." });
+        }
         console.error(err);
         res.status(500).json({ message: "Something went wrong. Please try again." });
     }
