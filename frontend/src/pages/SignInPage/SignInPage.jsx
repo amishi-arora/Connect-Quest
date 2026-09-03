@@ -1,7 +1,7 @@
 import styles from './SignInPage.module.css';
 import AuthModal from '../../components/AuthModal/AuthModal';
 
-export default function SignInPage() {
+export default function SignInPage({ setToken }) {
     return (
         <div className={styles.signInPage}>
             <div className={styles.signInGlow}/>
@@ -15,7 +15,7 @@ export default function SignInPage() {
                     </div>
                     <div className={styles.brandName}>Connect Quest</div>
                 </div>
-                <AuthModal/>
+                <AuthModal setToken={setToken}/>
             </div>
         </div>
     );

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { signIn, signUp, signOut, fetchAuthSession } from "aws-amplify/auth";
 import styles from './AuthModal.module.css';
 
-export default function AuthModal() {
+export default function AuthModal({ setToken }) {
   const navigate = useNavigate();
   const [tab, setTab] = useState("login");
   const [loginEmail, setLoginEmail] = useState("");
@@ -44,6 +44,7 @@ export default function AuthModal() {
     }
 
     localStorage.setItem("token", token);
+    setToken(token);
   }
 
   async function handleSignup(e) {

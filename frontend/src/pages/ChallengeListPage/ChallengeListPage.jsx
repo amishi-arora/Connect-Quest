@@ -7,7 +7,7 @@ import ChallengeDetailPanel from "../../components/ChallengeDetailPanel/Challeng
 import CelebrationModal from "../../components/CelebrationModal/CelebrationModal";
 import { getChallenges, submitChallenge, getProgress, getDailyChallenge } from "../../api";
 
-export default function ChallengeListPage() {
+export default function ChallengeListPage({ setToken }) {
   const [challenges, setChallenges] = useState([]);
   const [totalPoints, setTotalPoints] = useState(0);
   const [selectedChallenge, setSelectedChallenge] = useState(null);
@@ -18,8 +18,8 @@ export default function ChallengeListPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const dailyChallenge = challenges.find((c) => c.id === dailyChallengeId);
-  const navigate = useNavigate();
-
+  const navigate = useNavigate(); 
+  
   useEffect(() => {
     Promise.all([
       getChallenges(),
@@ -61,7 +61,8 @@ export default function ChallengeListPage() {
   async function handleLogout() {
     await signOut();
     localStorage.removeItem("token");
-    navigate("/");
+    setToken(null);
+    navigate("/"); 
   }
 
   function openPanel(challenge) {

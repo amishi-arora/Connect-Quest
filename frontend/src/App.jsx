@@ -13,13 +13,13 @@ function isTokenValid(token) {
 }
 
 export default function App() {
-  const token = localStorage.getItem("token");
+  const [token, setToken] = useState(localStorage.getItem("token"));
   return (
     <Routes>
-      <Route path="/" element={isTokenValid(token) ? <Navigate to="/challenges" /> : <SignInPage />} />
+      <Route path="/" element={isTokenValid(token) ? <Navigate to="/challenges" /> : <SignInPage setToken={setToken}/>} />
       <Route
         path="/challenges"
-        element={isTokenValid(token) ? <ChallengeListPage /> : <Navigate to="/" />}
+        element={isTokenValid(token) ? <ChallengeListPage setToken={setToken}/> : <Navigate to="/" />}
       />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
