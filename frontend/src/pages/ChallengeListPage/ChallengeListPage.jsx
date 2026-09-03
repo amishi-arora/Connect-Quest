@@ -5,7 +5,7 @@ import styles from "./ChallengeListPage.module.css";
 import ChallengeCard from "../../components/ChallengeCard/ChallengeCard";
 import ChallengeDetailPanel from "../../components/ChallengeDetailPanel/ChallengeDetailPanel";
 import CelebrationModal from "../../components/CelebrationModal/CelebrationModal";
-import { getChallenges, getProgress, getDailyChallenge } from "../../api";
+import { getChallenges, submitChallenge, getProgress, getDailyChallenge } from "../../api";
 
 export default function ChallengeListPage() {
   const [challenges, setChallenges] = useState([]);
