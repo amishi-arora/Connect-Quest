@@ -138,3 +138,11 @@
   color: var(--text-soft); 
   font-weight: 500;
 }
+
+.error {
+  text-align: center;
+  margin: 40px 0;
+  font-size: 16px;
+  color: var(--text-soft); 
+  font-weight: 500;
+}
