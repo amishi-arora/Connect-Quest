@@ -1,4 +1,5 @@
 require("dotenv").config();
+const serverless = require("serverless-http");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -383,6 +384,4 @@ app.get("/api/daily-challenge", verifyCognitoToken, async (req, res) => {
 });
 
 // -- Start Server --- 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+module.exports.handler = serverless(app);
