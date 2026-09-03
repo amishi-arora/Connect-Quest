@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const helmet = require("helmet"); const { CognitoIdentityProviderClient, AdminConfirmSignUpCommand } = require("@aws-sdk/client-cognito-identity-provider");
+const helmet = require("helmet");
 const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { CognitoJwtVerifier } = require("aws-jwt-verify");
@@ -11,20 +11,28 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const TOTAL_CHALLENGES = 20;
 
-const cognitoClient = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION })
 const s3Client = new S3Client({ region: process.env.AWS_REGION });
 const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 const bedrockClient = new BedrockRuntimeClient({ region: process.env.AWS_REGION });
 
 // -- Helpers --- 
-function getTodaysChallengeIndex(totalChallenges) {
+class SubmissionError extends Error {
+    constructor(status, message) {
+        super(message);
+        this.status = status;
+    }
+}
+
+function getTodaysChallengeId(totalChallenges) {
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 0);
     const diff = now - startOfYear;
     const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-    return dayOfYear % totalChallenges;
+
+    return String(((dayOfYear - 1) % totalChallenges) + 1);
 }
 
 function getDateString(date) {
@@ -38,15 +46,44 @@ function getYesterdayString() {
 }
 
 async function getTodaysChallenge() {
-    const challengesResult = await docClient.send(new ScanCommand({ TableName: "Challenges" }));
-    const challenges = challengesResult.Items.sort((a, b) => Number(a.id) - Number(b.id));
-    const todaysIndex = getTodaysChallengeIndex(challenges.length);
-    return challenges[todaysIndex];
+    const challengeId = getTodaysChallengeId(TOTAL_CHALLENGES);
+
+    const result = await docClient.send(
+        new GetCommand({
+            TableName: "Challenges",
+            Key: { id: challengeId },
+        })
+    );
+
+    return result.Item;
+}
+
+async function callNovaForVerification(contentArray) {
+    const command = new InvokeModelCommand({
+        modelId: "amazon.nova-lite-v1:0",
+        contentType: "application/json",
+        accept: "application/json",
+        body: JSON.stringify({
+            messages: [{ role: "user", content: contentArray }],
+            inferenceConfig: { maxTokens: 200, temperature: 0 },
+        }),
+    });
+
+    const response = await bedrockClient.send(command);
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    const rawText = responseBody.output.message.content[0].text;
+
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+        console.error("No JSON found in Nova response:", rawText);
+        throw new Error("AI verification returned an unparseable response");
+    }
+    return JSON.parse(jsonMatch[0]);
 }
 
 async function verifyTextAnswer(requirements, answer) {
     const prompt = `You are checking whether a student's submission for a campus challenge satisfies its requirements. 
-    Be lenient - if the answer is plausible and reasonably shows the requirements were met, approve it. 
+    be lenient - if the answer is plausible and reasonably shows the requirements were met, approve it. 
     Reject if the answer is clearly unrelated, empty of real content, or obviously does not attempt to meet the requirements.
 
 Requirements:
@@ -64,35 +101,13 @@ Before rejecting, re-read the answer carefully to make sure your stated reason i
 
 Respond with ONLY a JSON object, no other text, no markdown, no code fences, in this exact format:
 {"approved": true or false, "reason": "one short sentence explaining why"}`;
-
-    const command = new InvokeModelCommand({
-        modelId: "amazon.nova-lite-v1:0",
-        contentType: "application/json",
-        accept: "application/json",
-        body: JSON.stringify({
-            messages: [{ role: "user", content: [{ text: prompt }] }],
-            inferenceConfig: { maxTokens: 200, temperature: 0.2 },
-        }),
-    });
-
-    const response = await bedrockClient.send(command);
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-    const rawText = responseBody.output.message.content[0].text;
-
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-        console.error("No JSON found in Nova response:", rawText);
-        throw new Error("AI verification returned an unparseable response");
-    }
-
-    return JSON.parse(jsonMatch[0]);
+    return callNovaForVerification([{ text: prompt }]);
 }
-
 
 async function verifyPhotoAnswer(requirements, base64Image) {
     const prompt = `You are checking whether a photo satisfies a campus challenge's requirements. 
-    Be Lenient — if the photo plausibly shows what was asked for, approve it. 
-    Rject if the photo is clearly unrelated or doesn't attempt to show what was requested.
+    be lenient — if the photo plausibly shows what was asked for, approve it. 
+    Reject if the photo is clearly unrelated or doesn't attempt to show what was requested.
 
 Requirements:
 ${requirements.map((r) => `- ${r}`).join("\n")}
@@ -106,37 +121,80 @@ Before rejecting, re-read the answer carefully to make sure your stated reason i
 
 Respond with ONLY a JSON object, no other text, no markdown, no code fences, in this exact format:
 {"approved": true or false, "reason": "one short sentence explaining why"}`;
-
-    const command = new InvokeModelCommand({
-        modelId: "amazon.nova-lite-v1:0",
-        contentType: "application/json",
-        accept: "application/json",
-        body: JSON.stringify({
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        { image: { format: "jpeg", source: { bytes: base64Image } } },
-                        { text: prompt },
-                    ],
-                },
-            ],
-            inferenceConfig: { maxTokens: 200, temperature: 0 },
-        }),
-    });
-
-    const response = await bedrockClient.send(command);
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-    const rawText = responseBody.output.message.content[0].text;
-
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-        console.error("No JSON found in Nova response:", rawText);
-        throw new Error("AI verification returned an unparseable response");
-    }
-    return JSON.parse(jsonMatch[0]);
+    return callNovaForVerification([
+        { image: { format: "jpeg", source: { bytes: base64Image } } },
+        { text: prompt },
+    ]);
 }
 
+async function verifySubmission(challenge, submission) {
+    if (challenge.submissionType === "photo") {
+        if (!isValidImageBase64(submission)) {
+            throw new SubmissionError(400, "Invalid image. Please upload a JPEG or PNG photo.");
+        }
+        return verifyPhotoAnswer(challenge.requirements, submission);
+    }
+    if (challenge.submissionType === "text") {
+        if (typeof submission !== "string") {
+            throw new SubmissionError(400, "Please provide a valid text answer.");
+        }
+        if (submission.length > 500) {
+            throw new SubmissionError(400, "Your answer is too long — please keep it under 500 characters.");
+        }
+        return verifyTextAnswer(challenge.requirements, submission);
+    }
+    throw new SubmissionError(500, "This challenge is misconfigured.");
+}
+
+async function updateStreakIfDaily(userId, challengeId) {
+    const todaysChallengeId = (await getTodaysChallenge()).id;
+    if (todaysChallengeId !== challengeId) return;
+
+    const today = getDateString(new Date());
+    const yesterday = getYesterdayString();
+    const streakResult = await docClient.send(
+        new GetCommand({ TableName: "UserStreaks", Key: { userId } })
+    );
+    const existing = streakResult.Item;
+    const newStreak = existing?.lastCompletedDate === yesterday ? existing.currentStreak + 1 : 1;
+
+    await docClient.send(
+        new PutCommand({
+            TableName: "UserStreaks",
+            Item: { userId, currentStreak: newStreak, lastCompletedDate: today },
+        })
+    );
+}
+
+async function getChallenge(challengeId) {
+    const result = await docClient.send(
+        new GetCommand({ TableName: "Challenges", Key: { id: challengeId } })
+    );
+    return result.Item;
+}
+
+async function handlePhotoUpload(userId, challengeId, base64Image) {
+    const photoKey = await uploadPhotoToS3(userId, challengeId, base64Image);
+    const photoUrl = await getPhotoUrl(photoKey);
+    return { photoKey, photoUrl };
+}
+
+async function saveProgress(userId, challengeId, submission, submissionType, photoKey) {
+    await docClient.send(
+        new PutCommand({
+            TableName: "UserProgress",
+            Item: {
+                userId,
+                challengeId,
+                status: "completed",
+                answer: submissionType === "photo" ? null : submission,
+                photoKey,
+                completedAt: new Date().toISOString(),
+            },
+            ConditionExpression: "attribute_not_exists(userId)",
+        })
+    );
+}
 
 async function uploadPhotoToS3(userId, challengeId, base64Image) {
     const buffer = Buffer.from(base64Image, "base64");
@@ -173,6 +231,17 @@ function isValidImageBase64(base64String) {
     }
 }
 
+async function getPhotoUrl(photoKey) {
+    return getSignedUrl(
+        s3Client,
+        new GetObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: photoKey,
+        }),
+        { expiresIn: 3600 }
+    );
+}
+
 // --- Authorization --- 
 const jwtVerifier = CognitoJwtVerifier.create({
     userPoolId: process.env.COGNITO_USER_POOL_ID,
@@ -201,22 +270,6 @@ app.use(helmet())
 app.use(express.json({ limit: "10mb" }));
 
 // --- Routes ---
-app.post("/api/confirm-user", async (req, res) => {
-    const { email } = req.body;
-    try {
-        await cognitoClient.send(
-            new AdminConfirmSignUpCommand({
-                UserPoolId: process.env.COGNITO_USER_POOL_ID,
-                Username: email,
-            })
-        );
-        res.json({ confirmed: true });
-    } catch (err) {
-        console.error(err);
-        res.status(400).json({ message: err.message });
-    }
-});
-
 app.get("/api/challenges", verifyCognitoToken, async (req, res) => {
     try {
         const result = await docClient.send(new ScanCommand({ TableName: "Challenges" }));
@@ -240,11 +293,7 @@ app.get("/api/progress", verifyCognitoToken, async (req, res) => {
         const itemsWithUrls = await Promise.all(
             result.Items.map(async (item) => {
                 if (item.photoKey) {
-                    const url = await getSignedUrl(
-                        s3Client,
-                        new GetObjectCommand({ Bucket: process.env.S3_BUCKET_NAME, Key: item.photoKey }),
-                        { expiresIn: 3600 } // valid for 1 hour
-                    );
+                    const url = await getPhotoUrl(item.photoKey);
                     return { ...item, photoUrl: url };
                 }
                 return item;
@@ -261,93 +310,32 @@ app.get("/api/progress", verifyCognitoToken, async (req, res) => {
 app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
     const challengeId = req.params.id;
     const { submission } = req.body;
+    if (!submission) {
+        return res.status(400).json({ message: "No submission provided." });
+    }
 
     try {
-        const challengeResult = await docClient.send(
-            new GetCommand({
-                TableName: "Challenges",
-                Key: { id: challengeId },
-            })
-        );
-        const challenge = challengeResult.Item;
+        const challenge = await getChallenge(challengeId);
+        if (!challenge) return res.status(404).json({ message: "Challenge not found" });
 
-        if (!challenge) {
-            return res.status(404).json({ message: "Challenge not found" });
-        }
-
-        let verification;
-        if (challenge.submissionType === "photo") {
-            if (!isValidImageBase64(submission)) {
-                return res.status(400).json({ message: "Invalid image. Please upload a JPEG or PNG photo." });
-            }
-            verification = await verifyPhotoAnswer(challenge.requirements, submission);
-        } else if (challenge.submissionType === "text") {
-            if (submission.length > 500) {
-                return res.status(400).json({ message: "Your answer is too long — please keep it under 500 characters." });
-            }
-            verification = await verifyTextAnswer(challenge.requirements, submission);
-        }
-
+        const verification = await verifySubmission(challenge, submission);
         if (!verification.approved) {
-            return res.status(422).json({
-                message: "Your submission doesn't quite match the requirements.",
-                reason: verification.reason,
-            });
+            return res.status(422).json({ message: "Your submission doesn't quite match the requirements.", reason: verification.reason });
         }
 
-        let photoKey = null;
-        let photoUrl = null;
-        if (challenge.submissionType === "photo") {
-            photoKey = await uploadPhotoToS3(req.user.sub, challengeId, submission);
-            photoUrl = await getSignedUrl(
-                s3Client,
-                new GetObjectCommand({ Bucket: process.env.S3_BUCKET_NAME, Key: photoKey }),
-                { expiresIn: 3600 }
-            );
-        }
+        const { photoKey, photoUrl } = challenge.submissionType === "photo"
+            ? await handlePhotoUpload(req.user.sub, challengeId, submission)
+            : { photoKey: null, photoUrl: null };
 
-
-        await docClient.send(
-            new PutCommand({
-                TableName: "UserProgress",
-                Item: {
-                    userId: req.user.sub,
-                    challengeId,
-                    status: "completed",
-                    answer: challenge.submissionType === "photo" ? null : submission,
-                    photoKey,
-                    completedAt: new Date().toISOString(),
-                },
-                ConditionExpression: "attribute_not_exists(userId)",
-            })
-        );
-
-        const todaysChallenge = await getTodaysChallenge();
-        if (todaysChallenge.id === challengeId) {
-            const today = getDateString(new Date());
-            const yesterday = getYesterdayString();
-
-            const streakResult = await docClient.send(
-                new GetCommand({ TableName: "UserStreaks", Key: { userId: req.user.sub } })
-            );
-            const existing = streakResult.Item;
-
-            const newStreak = existing?.lastCompletedDate === yesterday ? existing.currentStreak + 1 : 1;
-
-            await docClient.send(
-                new PutCommand({
-                    TableName: "UserStreaks",
-                    Item: {
-                        userId: req.user.sub,
-                        currentStreak: newStreak,
-                        lastCompletedDate: today,
-                    },
-                })
-            );
-        }
+        await saveProgress(req.user.sub, challengeId, submission, challenge.submissionType, photoKey);
+        await updateStreakIfDaily(req.user.sub, challengeId);
 
         res.json({ success: true, pointsEarned: challenge.points, photoUrl });
     } catch (err) {
+        if (err instanceof SubmissionError) {
+            return res.status(err.status).json({ message: err.message });
+        }
+
         if (err.name === "ConditionalCheckFailedException") {
             return res.status(409).json({ message: "You've already completed this challenge." });
         }
