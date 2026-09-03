@@ -5,6 +5,7 @@ import styles from "./ChallengeListPage.module.css";
 import ChallengeCard from "../../components/ChallengeCard/ChallengeCard";
 import ChallengeDetailPanel from "../../components/ChallengeDetailPanel/ChallengeDetailPanel";
 import CelebrationModal from "../../components/CelebrationModal/CelebrationModal";
+import { getChallenges, getProgress, getDailyChallenge } from "../../api";
 
 export default function ChallengeListPage() {
   const [challenges, setChallenges] = useState([]);
@@ -18,18 +19,10 @@ export default function ChallengeListPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
     Promise.all([
-      fetch(`http://localhost:3000/api/challenges`, {
-        headers: { Authorization: `Bearer ${token}` }
-      }).then((res) => res.json()),
-      fetch(`http://localhost:3000/api/progress`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then((res) => res.json()),
-      fetch(`http://localhost:3000/api/daily-challenge`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then((res) => res.json()),
+      getChallenges(),
+      getProgress(),
+      getDailyChallenge()
     ])
       .then(([challengesData, progressData, dailyData]) => {
         const progressByChallengeId = {};
@@ -74,34 +67,30 @@ export default function ChallengeListPage() {
   }
 
   async function handleSubmit(challenge, answer) {
-    const token = localStorage.getItem("token");
-
-    const res = await fetch(`http://localhost:3000/api/challenges/${challenge.id}/submit`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ submission: answer }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.reason || data.message || "Submission failed");
+    const data = await submitChallenge(challenge.id, answer);
 
     setChallenges((prev) =>
-      prev.map((c) => (c.id === challenge.id ? { ...c, completed: true, submittedAnswer: answer, submittedPhotoUrl: data.photoUrl } : c))
+      prev.map((c) =>
+        c.id === challenge.id
+          ? {
+            ...c,
+            completed: true,
+            submittedAnswer: answer,
+            submittedPhotoUrl: data.photoUrl,
+          }
+          : c
+      )
     );
+
     setTotalPoints((prev) => prev + data.pointsEarned);
+
     if (challenge.id === dailyChallenge.id) {
-      const dailyRes = await fetch(`http://localhost:3000/api/daily-challenge`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const dailyData = await dailyRes.json();
+      const dailyData = await getDailyChallenge();
       setStreak(dailyData.streak);
     }
+
     closePanel();
     setIsCelebrationOpen(true);
-
   }
 
   function closeCelebration() {
