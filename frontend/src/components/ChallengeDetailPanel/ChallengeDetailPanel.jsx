@@ -182,7 +182,7 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
               <>
                 <div className={styles.fieldLabel}>What did you accomplish?</div>
                 <textarea
-                  placeholder="Describe what you did to complete this challenge. Be specific about your experience!"
+                  placeholder="Describe what you did to complete this challenge. Make sure your response addresses the requirements above!"
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
                   maxLength={500}
