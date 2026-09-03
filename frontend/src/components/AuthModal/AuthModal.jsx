@@ -16,7 +16,7 @@ export default function AuthModal() {
   const [loading, setLoading] = useState(false);
 
 
-  async function signInAfterSignup(email, password) {
+  async function signInUser(email, password) {
     try {
       await signIn({
         username: email,
@@ -50,10 +50,8 @@ export default function AuthModal() {
     e.preventDefault();
     setError("");
 
-
     try {
       setLoading(true);
-
       if (signupPassword !== confirmPassword) {
         setError("Passwords don't match");
         return;
@@ -70,7 +68,7 @@ export default function AuthModal() {
         },
       });
 
-      await signInAfterSignup(signupEmail, signupPassword);
+      await signInUser(signupEmail, signupPassword);
 
       await saveAuthToken();
 
@@ -85,22 +83,12 @@ export default function AuthModal() {
 
   async function handleLogin(e) {
     e.preventDefault();
-    setLoading(true);
     setError("");
-    try {
-      try {
-        await signIn({ username: loginEmail, password: loginPassword });
-      } catch (err) {
-        if (err.name === "UserAlreadyAuthenticatedException") {
-          await signOut();
-          await signIn({ username: loginEmail, password: loginPassword });
-        } else {
-          throw err;
-        }
-      }
-      const session = await fetchAuthSession();
-      localStorage.setItem("token", session.tokens?.idToken?.toString());
 
+    try {
+      setLoading(true);
+      await signInUser(loginEmail, loginPassword); 
+      await saveAuthToken();
       navigate("/challenges");
     } catch (err) {
       setError(err.message || "Login failed");

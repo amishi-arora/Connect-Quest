@@ -15,6 +15,8 @@ export default function ChallengeListPage() {
   const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
   const [dailyChallengeId, setDailyChallengeId] = useState(null);
   const [streak, setStreak] = useState(0);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const dailyChallenge = challenges.find((c) => c.id === dailyChallengeId);
   const navigate = useNavigate();
 
@@ -48,7 +50,12 @@ export default function ChallengeListPage() {
           .reduce((sum, c) => sum + c.points, 0);
         setTotalPoints(earned);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        setError(err.message || "Failed to load challenges.");
+      })
+      .finally(() => {
+        setLoading(false);
+      })
   }, []);
 
   async function handleLogout() {
@@ -84,7 +91,7 @@ export default function ChallengeListPage() {
 
     setTotalPoints((prev) => prev + data.pointsEarned);
 
-    if (challenge.id === dailyChallenge.id) {
+    if (challenge.id === dailyChallengeId) {
       const dailyData = await getDailyChallenge();
       setStreak(dailyData.streak);
     }
@@ -135,6 +142,9 @@ export default function ChallengeListPage() {
             🔥 {streak} day streak — keep it going!
           </div>
         )}
+
+        {error && <p className={styles.error}>{error}</p>}
+        {loading && <p className={styles.loading}>Loading challenges...</p>}
 
         {dailyChallenge && (
           <ChallengeCard challenge={dailyChallenge} onClick={openPanel} isDaily />

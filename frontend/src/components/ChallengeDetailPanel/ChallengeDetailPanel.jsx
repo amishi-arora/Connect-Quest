@@ -15,6 +15,14 @@ export default function ChallengeDetailPanel({ challenge, isOpen, onClose, onSub
     setPhotoPreview(null);
   }, [challenge]);
 
+  useEffect(() => {
+    return () => {
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
+
   if (!challenge) return null;
 
   const isPhotoChallenge = challenge.submissionType === "photo";
