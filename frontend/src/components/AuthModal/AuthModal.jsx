@@ -15,11 +15,45 @@ export default function AuthModal() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+
+  async function signInAfterSignup(email, password) {
+    try {
+      await signIn({
+        username: email,
+        password,
+      });
+    } catch (err) {
+      if (err.name !== "UserAlreadyAuthenticatedException") {
+        throw err;
+      }
+      await signOut();
+
+      await signIn({
+        username: email,
+        password,
+      });
+    }
+  }
+
+  async function saveAuthToken() {
+    const session = await fetchAuthSession();
+    const token = session.tokens?.idToken?.toString();
+
+    if (!token) {
+      throw new Error("Failed to retrieve authentication token");
+    }
+
+    localStorage.setItem("token", token);
+  }
+
   async function handleSignup(e) {
     e.preventDefault();
     setError("");
-    setLoading(true);
+
+
     try {
+      setLoading(true);
+
       if (signupPassword !== confirmPassword) {
         setError("Passwords don't match");
         return;
@@ -28,28 +62,17 @@ export default function AuthModal() {
       await signUp({
         username: signupEmail,
         password: signupPassword,
-        options: { userAttributes: { email: signupEmail, name: signupName } },
+        options: {
+          userAttributes: {
+            email: signupEmail,
+            name: signupName,
+          },
+        },
       });
 
-      await fetch("http://localhost:3000/api/confirm-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: signupEmail }),
-      });
+      await signInAfterSignup(signupEmail, signupPassword);
 
-      try {
-        await signIn({ username: signupEmail, password: signupPassword });
-      } catch (err) {
-        if (err.name === "UserAlreadyAuthenticatedException") {
-          await signOut();
-          await signIn({ username: signupEmail, password: signupPassword });
-        } else {
-          throw err;
-        }
-      }
-
-      const session = await fetchAuthSession();
-      localStorage.setItem("token", session.tokens?.idToken?.toString());
+      await saveAuthToken();
 
       navigate("/challenges");
     } catch (err) {
@@ -58,6 +81,7 @@ export default function AuthModal() {
       setLoading(false);
     }
   }
+
 
   async function handleLogin(e) {
     e.preventDefault();
