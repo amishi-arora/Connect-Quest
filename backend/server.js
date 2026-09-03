@@ -341,7 +341,10 @@ app.post("/api/challenges/:id/submit", verifyCognitoToken, async (req, res) => {
             return res.status(409).json({ message: "You've already completed this challenge." });
         }
         console.error(err);
-        res.status(500).json({ message: "Something went wrong. Please try again." });
+        return res.status(500).json({
+            message: err.message || "Something went wrong. Please try again.",
+            error: err.name
+        });
     }
 });
 
