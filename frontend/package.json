@@ -7,6 +7,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "aws-amplify": "^6.20.0",
     "axios": "^1.7.9",
     "canvas-confetti": "^1.9.4",
     "dom": "^0.0.3",
