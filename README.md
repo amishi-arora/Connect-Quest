@@ -35,22 +35,35 @@ Students can complete community-focused challenges and submit text or photo evid
 
 ### Installation
 
-Clone the repository:
+1. Clone the repository:
 
 ```bash
 git clone https://github.com/amishi-arora/Connect-Quest.git
-cd ConnectQuest
+cd Connect-Quest
 ```
 
-Install dependencies:
-
+2. Install dependencies:
+```bash 
+cd frontend
+npm install
+```
 ```bash
+cd ../backend
 npm install
 ```
 
-Configure the required environment variables and AWS resources, then start the application:
+3. Configure the required environment variables and AWS resources
+
+4. Start the backend 
 
 ```bash
+cd backend
+npm start
+```
+
+5. Start the frontend
+```bash
+cd frontend
 npm start
 ```
 
