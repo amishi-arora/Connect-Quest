@@ -384,4 +384,10 @@ app.get("/api/daily-challenge", verifyCognitoToken, async (req, res) => {
 });
 
 // -- Start Server --- 
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
 module.exports.handler = serverless(app);
