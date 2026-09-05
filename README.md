@@ -52,19 +52,19 @@ cd ../backend
 npm install
 ```
 
-3. Configure the required environment variables and AWS resources
+3. Configure environment variables based on the .env.example files
 
 4. Start the backend 
 
 ```bash
 cd backend
-npm start
+node server.js
 ```
 
 5. Start the frontend
 ```bash
 cd frontend
-npm start
+npm run dev
 ```
 
 ## 📌 Future Improvements
